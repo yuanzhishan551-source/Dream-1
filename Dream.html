@@ -1284,7 +1284,7 @@
                 }
             });
 
-            // 检测所有门是否占据50%视野
+            // 检测所有门是否占据70%视野
             if (!isAnimating) {
                 if (zoomLevel >= 0.7) {
                     // 在3D模式下检测白门和纹理门
@@ -1292,8 +1292,8 @@
                     const door1Ratio = checkDoorInView(textureDoor1);
                     const door2Ratio = checkDoorInView(textureDoor2);
 
-                    // 判断哪个门占据了50%以上的视野
-                    if (whiteDoorRatio >= 0.5 || door1Ratio >= 0.5 || door2Ratio >= 0.5) {
+                    // 判断哪个门占据了70%以上的视野
+                    if (whiteDoorRatio >= 0.7 || door1Ratio >= 0.7 || door2Ratio >= 0.7) {
                         // 触发白门动画
                         isAnimating = true;
                         animationType = 'white';
@@ -1304,7 +1304,7 @@
                     // 在平面模式下检测黑门
                     const blackDoorRatio = checkDoorInView(dreamcoreDoor);
 
-                    if (blackDoorRatio >= 0.5) {
+                    if (blackDoorRatio >= 0.7) {
                         // 触发黑门动画
                         isAnimating = true;
                         animationType = 'black';
@@ -1319,18 +1319,23 @@
                 animationProgress += 0.01;
 
                 if (animationType === 'white') {
-                    // 白门动画：持续放大，然后白光消散
-                    if (animationProgress < 0.5) {
-                        // 前半段：继续放大
+                    // 白门动画：门持续放大占满屏幕，然后白光闪现并消散
+                    if (animationProgress < 0.8) {
+                        // 第一阶段：门持续放大直到占满整个屏幕
                         targetZoom -= 0.15;
-                    } else if (animationProgress < 0.7) {
-                        // 白光闪现
+
+                        // 确保门真正占满屏幕
+                        if (targetZoom < 0.05) {
+                            targetZoom = 0.05;
+                        }
+                    } else if (animationProgress < 0.85) {
+                        // 第二阶段：白光快速闪现
                         const flashDiv = document.getElementById('whiteFlash');
-                        flashDiv.style.opacity = (animationProgress - 0.5) / 0.2;
+                        flashDiv.style.opacity = (animationProgress - 0.8) / 0.05;
                     } else if (animationProgress < 1.0) {
-                        // 白光消散，回到3D世界
+                        // 第三阶段：白光消散，准备回到3D世界
                         const flashDiv = document.getElementById('whiteFlash');
-                        flashDiv.style.opacity = 1 - ((animationProgress - 0.7) / 0.3);
+                        flashDiv.style.opacity = 1 - ((animationProgress - 0.85) / 0.15);
                     } else {
                         // 动画结束
                         isAnimating = false;
@@ -1350,12 +1355,20 @@
                         applyWeirdEffects();
                     }
                 } else if (animationType === 'black') {
-                    // 黑门动画：屏幕变黑，显示文字
-                    if (animationProgress < 0.8) {
-                        // 屏幕变黑（通过减小FOV和背景色）
-                        renderer.setClearColor(0x000000, animationProgress / 0.8);
+                    // 黑门动画：门放大占满屏幕，然后屏幕变黑，显示文字
+                    if (animationProgress < 0.6) {
+                        // 第一阶段：黑门持续放大
+                        targetPlaneFOV -= 1.0;
+                        if (targetPlaneFOV < 1) {
+                            targetPlaneFOV = 1;
+                        }
+                    } else if (animationProgress < 0.8) {
+                        // 第二阶段：屏幕变黑
+                        const blackness = (animationProgress - 0.6) / 0.2;
+                        renderer.setClearColor(0x000000, blackness);
                     } else if (animationProgress < 1.5) {
-                        // 显示"You woke up"文字
+                        // 第三阶段：显示"You woke up"文字
+                        renderer.setClearColor(0x000000, 1);
                         const endTextDiv = document.getElementById('endText');
                         endTextDiv.textContent = 'You woke up';
                         endTextDiv.style.opacity = (animationProgress - 0.8) / 0.7;
