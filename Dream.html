@@ -27,11 +27,25 @@
             font-family: 'Courier New', monospace;
             letter-spacing: 8px;
             z-index: 1000;
+            transition: opacity 2s ease;
+        }
+        #whiteFlash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 999;
+            transition: opacity 1s ease;
         }
     </style>
 </head>
 <body>
     <div id="endText"></div>
+    <div id="whiteFlash"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         let scene, camera, renderer;
@@ -53,6 +67,13 @@
         let wasInPlaneMode = false;
         let whiteDoor;
         let textureDoor1, textureDoor2; // 两个新的纹理门
+        let whiteDoorEnterCount = 0; // 进入白门的次数
+        let isAnimating = false; // 是否正在播放动画
+        let animationType = null; // 动画类型: 'white' 或 'black'
+        let animationProgress = 0; // 动画进度 0-1
+        let userControlLocked = false; // 用户控制是否被锁定
+        let weirdEyes = []; // 古怪的眼睛
+        let skyText = null; // 天空中的Dream文字
 
         function init() {
             scene = new THREE.Scene();
@@ -82,6 +103,8 @@
             createDreamcoreDoor();
             createTextureDoor1();
             createTextureDoor2();
+            createWeirdEyes();
+            createSkyText();
 
             document.addEventListener('mousedown', onMouseDown);
             document.addEventListener('mouseup', onMouseUp);
@@ -694,6 +717,120 @@
             scene.add(textureDoor2);
         }
 
+        function createWeirdEyes() {
+            // 创建多个古怪的眼睛，初始不可见
+            for (let i = 0; i < 8; i++) {
+                const eyeGroup = new THREE.Group();
+
+                // 眼白
+                const whiteGeometry = new THREE.SphereGeometry(0.8, 16, 16);
+                const whiteMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    roughness: 0.4,
+                    metalness: 0.1
+                });
+                const white = new THREE.Mesh(whiteGeometry, whiteMaterial);
+                eyeGroup.add(white);
+
+                // 瞳孔
+                const pupilGeometry = new THREE.SphereGeometry(0.4, 16, 16);
+                const pupilMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x000000,
+                    emissive: 0x000000,
+                    emissiveIntensity: 0.5
+                });
+                const pupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
+                pupil.position.z = 0.5;
+                eyeGroup.add(pupil);
+
+                // 随机位置
+                const angle = (i / 8) * Math.PI * 2;
+                const distance = 20 + Math.random() * 10;
+                eyeGroup.position.set(
+                    Math.sin(angle) * distance,
+                    Math.random() * 10 + 2,
+                    Math.cos(angle) * distance
+                );
+
+                eyeGroup.userData.floatSpeed = Math.random() * 0.01 + 0.005;
+                eyeGroup.userData.floatOffset = Math.random() * Math.PI * 2;
+                eyeGroup.visible = false;
+                eyeGroup.castShadow = true;
+
+                weirdEyes.push(eyeGroup);
+                scene.add(eyeGroup);
+            }
+        }
+
+        function createSkyText() {
+            // 创建天空中的"Dream"文字
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            // 梦核风格字体
+            ctx.font = 'bold 300px "Courier New", monospace';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // 添加发光效果
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+            ctx.shadowBlur = 30;
+
+            ctx.fillText('DREAM', 1024, 256);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true,
+                opacity: 0.9,
+                side: THREE.DoubleSide
+            });
+
+            const geometry = new THREE.PlaneGeometry(100, 25);
+            skyText = new THREE.Mesh(geometry, material);
+            skyText.position.set(0, 35, -50);
+            skyText.visible = false;
+            scene.add(skyText);
+        }
+
+        function applyWeirdEffects() {
+            if (whiteDoorEnterCount === 1) {
+                // 第一次：扭曲房子，显示眼睛
+                if (house) {
+                    house.scale.set(1.2, 0.8, 1.1);
+                    house.rotation.z = Math.PI / 32;
+                }
+
+                // 显示眼睛
+                weirdEyes.forEach(eye => {
+                    eye.visible = true;
+                });
+
+            } else if (whiteDoorEnterCount === 2) {
+                // 第二次：更扭曲，显示天空文字
+                if (house) {
+                    house.scale.set(0.9, 1.3, 1.2);
+                    house.rotation.z = -Math.PI / 24;
+                }
+
+                // 显示天空Dream文字
+                if (skyText) {
+                    skyText.visible = true;
+                }
+
+            } else if (whiteDoorEnterCount >= 3) {
+                // 第三次及以后：持续变化
+                if (house) {
+                    const randomScale = 0.8 + Math.random() * 0.6;
+                    house.scale.set(randomScale, 2 - randomScale, randomScale);
+                    house.rotation.z = (Math.random() - 0.5) * Math.PI / 16;
+                }
+            }
+        }
+
         function checkDoorInView(door) {
             if (!door || !door.visible) {
                 return 0;
@@ -764,14 +901,14 @@
         }
 
         function onMouseMove(e) {
-            if (isMouseDown) {
+            if (isMouseDown && !userControlLocked) {
                 const deltaX = e.clientX - lastMouseX;
                 const deltaY = e.clientY - lastMouseY;
-                
+
                 targetRotationY -= deltaX * 0.003;
                 targetRotationX -= deltaY * 0.003;
                 targetRotationX = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, targetRotationX));
-                
+
                 lastMouseX = e.clientX;
                 lastMouseY = e.clientY;
             }
@@ -785,14 +922,14 @@
         }
 
         function onTouchMove(e) {
-            if (e.touches.length === 1) {
+            if (e.touches.length === 1 && !userControlLocked) {
                 const deltaX = e.touches[0].clientX - lastMouseX;
                 const deltaY = e.touches[0].clientY - lastMouseY;
-                
+
                 targetRotationY -= deltaX * 0.003;
                 targetRotationX -= deltaY * 0.003;
                 targetRotationX = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, targetRotationX));
-                
+
                 lastMouseX = e.touches[0].clientX;
                 lastMouseY = e.touches[0].clientY;
             }
@@ -802,16 +939,21 @@
         }
 
         function onMouseWheel(e) {
+            if (userControlLocked) {
+                e.preventDefault();
+                return;
+            }
+
             e.preventDefault();
             const delta = e.deltaY * 0.002;
-            
+
             // 在平面模式下
             if (zoomLevel < 0.7) {
                 // 总是可以调整视野FOV（反转方向，保持和3D一致）
                 const fovDelta = -delta * 30; // 负号反转方向：向下滚=FOV减小=放大
                 targetPlaneFOV += fovDelta;
                 targetPlaneFOV = Math.max(0.1, Math.min(120, targetPlaneFOV)); // 最小0.1度，可以放得超级大
-                
+
                 // 只有在对准画面且尝试放大（delta > 0）时，才允许切换回3D
                 if (delta > 0 && canSwitchTo3D) {
                     targetZoom += delta;
@@ -1129,18 +1271,98 @@
                 });
             }
 
-            // 检测所有门是否占据70%视野（在3D模式下）
-            if (zoomLevel >= 0.7) {
-                const whiteDoorRatio = checkDoorInView(whiteDoor);
-                const door1Ratio = checkDoorInView(textureDoor1);
-                const door2Ratio = checkDoorInView(textureDoor2);
+            // 眼睛的浮动和看向相机的动画
+            weirdEyes.forEach(function(eye) {
+                if (eye.visible) {
+                    // 浮动
+                    eye.userData.floatOffset += eye.userData.floatSpeed;
+                    const baseY = eye.position.y;
+                    eye.position.y = baseY + Math.sin(eye.userData.floatOffset) * 0.5;
 
-                // 如果任何一个门占据70%视野，自动触发画廊模式
-                if (whiteDoorRatio >= 0.7 || door1Ratio >= 0.7 || door2Ratio >= 0.7) {
-                    // 快速过渡到画廊模式
-                    targetZoom -= 0.08;
-                    if (targetZoom < 0.5) {
-                        targetZoom = 0.5;
+                    // 眼睛看向相机
+                    eye.lookAt(camera.position);
+                }
+            });
+
+            // 检测所有门是否占据50%视野
+            if (!isAnimating) {
+                if (zoomLevel >= 0.7) {
+                    // 在3D模式下检测白门和纹理门
+                    const whiteDoorRatio = checkDoorInView(whiteDoor);
+                    const door1Ratio = checkDoorInView(textureDoor1);
+                    const door2Ratio = checkDoorInView(textureDoor2);
+
+                    // 判断哪个门占据了50%以上的视野
+                    if (whiteDoorRatio >= 0.5 || door1Ratio >= 0.5 || door2Ratio >= 0.5) {
+                        // 触发白门动画
+                        isAnimating = true;
+                        animationType = 'white';
+                        animationProgress = 0;
+                        userControlLocked = true;
+                    }
+                } else if (zoomLevel < 0.7) {
+                    // 在平面模式下检测黑门
+                    const blackDoorRatio = checkDoorInView(dreamcoreDoor);
+
+                    if (blackDoorRatio >= 0.5) {
+                        // 触发黑门动画
+                        isAnimating = true;
+                        animationType = 'black';
+                        animationProgress = 0;
+                        userControlLocked = true;
+                    }
+                }
+            }
+
+            // 处理门动画
+            if (isAnimating) {
+                animationProgress += 0.01;
+
+                if (animationType === 'white') {
+                    // 白门动画：持续放大，然后白光消散
+                    if (animationProgress < 0.5) {
+                        // 前半段：继续放大
+                        targetZoom -= 0.15;
+                    } else if (animationProgress < 0.7) {
+                        // 白光闪现
+                        const flashDiv = document.getElementById('whiteFlash');
+                        flashDiv.style.opacity = (animationProgress - 0.5) / 0.2;
+                    } else if (animationProgress < 1.0) {
+                        // 白光消散，回到3D世界
+                        const flashDiv = document.getElementById('whiteFlash');
+                        flashDiv.style.opacity = 1 - ((animationProgress - 0.7) / 0.3);
+                    } else {
+                        // 动画结束
+                        isAnimating = false;
+                        animationType = null;
+                        animationProgress = 0;
+                        userControlLocked = false;
+                        whiteDoorEnterCount++;
+
+                        // 重置到3D视角
+                        targetZoom = 1.0;
+                        zoomLevel = 1.0;
+
+                        const flashDiv = document.getElementById('whiteFlash');
+                        flashDiv.style.opacity = 0;
+
+                        // 应用古怪效果
+                        applyWeirdEffects();
+                    }
+                } else if (animationType === 'black') {
+                    // 黑门动画：屏幕变黑，显示文字
+                    if (animationProgress < 0.8) {
+                        // 屏幕变黑（通过减小FOV和背景色）
+                        renderer.setClearColor(0x000000, animationProgress / 0.8);
+                    } else if (animationProgress < 1.5) {
+                        // 显示"You woke up"文字
+                        const endTextDiv = document.getElementById('endText');
+                        endTextDiv.textContent = 'You woke up';
+                        endTextDiv.style.opacity = (animationProgress - 0.8) / 0.7;
+                    } else {
+                        // 保持显示文字
+                        const endTextDiv = document.getElementById('endText');
+                        endTextDiv.style.opacity = 1;
                     }
                 }
             }
