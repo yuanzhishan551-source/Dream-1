@@ -67,6 +67,7 @@
         let wasInPlaneMode = false;
         let whiteDoor;
         let textureDoor1, textureDoor2; // 两个新的纹理门
+        let doorClones = []; // 存储所有门的分身
         let whiteDoorEnterCount = 0; // 进入白门的次数
         let isAnimating = false; // 是否正在播放动画
         let animationType = null; // 动画类型: 'white' 或 'black'
@@ -103,6 +104,7 @@
             createDreamcoreDoor();
             createTextureDoor1();
             createTextureDoor2();
+            createDoorClones();
             createWeirdEyes();
             createSkyText();
 
@@ -627,6 +629,36 @@
             scene.add(textureDoor2);
         }
 
+        function createDoorClones() {
+            // 创建15个门的分身，随机分布在场景中
+            const doorTemplates = [whiteDoor, textureDoor1, textureDoor2];
+
+            for (let i = 0; i < 15; i++) {
+                // 随机选择一个门模板
+                const template = doorTemplates[Math.floor(Math.random() * doorTemplates.length)];
+                const doorClone = template.clone();
+
+                // 随机位置
+                const x = (Math.random() - 0.5) * 100; // -50 到 50
+                const y = Math.random() * 15; // 0 到 15 (地面到天空)
+                const z = -Math.random() * 45 - 5; // -5 到 -50 (不同的远近)
+
+                doorClone.position.set(x, y, z);
+
+                // 随机旋转，让门朝向不同方向
+                doorClone.rotation.y = Math.random() * Math.PI * 2;
+                doorClone.rotation.x = (Math.random() - 0.5) * Math.PI / 3;
+
+                // 随机缩放，制造大小变化
+                const scale = 0.5 + Math.random() * 1.5; // 0.5 到 2.0
+                doorClone.scale.set(scale, scale, scale);
+
+                doorClone.visible = true;
+                doorClones.push(doorClone);
+                scene.add(doorClone);
+            }
+        }
+
         function createWeirdEyes() {
             // 创建多个古怪的眼睛，初始不可见
             for (let i = 0; i < 8; i++) {
@@ -1006,6 +1038,11 @@
                 if (textureDoor1) textureDoor1.visible = true;
                 if (textureDoor2) textureDoor2.visible = true;
 
+                // 确保门分身可见
+                doorClones.forEach(function(door) {
+                    door.visible = true;
+                });
+
                 // 隐藏阴影平面和画廊环境光
                 scene.children.forEach(function(child) {
                     if (child.name === 'shadowPlane' || child.name === 'galleryAmbient') {
@@ -1059,6 +1096,11 @@
                 if (whiteDoor) whiteDoor.visible = false;
                 if (textureDoor1) textureDoor1.visible = false;
                 if (textureDoor2) textureDoor2.visible = false;
+
+                // 隐藏门分身
+                doorClones.forEach(function(door) {
+                    door.visible = false;
+                });
                 
                 // 显示阴影平面和画廊环境光
                 scene.children.forEach(function(child) {
@@ -1119,6 +1161,11 @@
                 if (whiteDoor) whiteDoor.visible = true;
                 if (textureDoor1) textureDoor1.visible = true;
                 if (textureDoor2) textureDoor2.visible = true;
+
+                // 显示门分身
+                doorClones.forEach(function(door) {
+                    door.visible = true;
+                });
 
                 renderer.setClearColor(0x87ceeb, 1);
                 scene.fog.color.setHex(0x87ceeb);
@@ -1207,8 +1254,17 @@
                     const door1Ratio = checkDoorInView(textureDoor1);
                     const door2Ratio = checkDoorInView(textureDoor2);
 
+                    // 检测所有门的分身
+                    let maxCloneRatio = 0;
+                    for (let i = 0; i < doorClones.length; i++) {
+                        const ratio = checkDoorInView(doorClones[i]);
+                        if (ratio > maxCloneRatio) {
+                            maxCloneRatio = ratio;
+                        }
+                    }
+
                     // 判断哪个门占据了70%以上的视野，并且用户正在主动放大（zoomLevel > 1.5）
-                    if ((whiteDoorRatio >= 0.7 || door1Ratio >= 0.7 || door2Ratio >= 0.7) && zoomLevel > 1.5) {
+                    if ((whiteDoorRatio >= 0.7 || door1Ratio >= 0.7 || door2Ratio >= 0.7 || maxCloneRatio >= 0.7) && zoomLevel > 1.5) {
                         // 触发白门动画
                         isAnimating = true;
                         animationType = 'white';
