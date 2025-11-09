@@ -323,6 +323,33 @@
             doorInside.position.set(0, 0, 0.26);
             whiteDoor.add(doorInside);
 
+            // 添加涂鸦文字 "close enough?"
+            const textCanvas = document.createElement('canvas');
+            textCanvas.width = 512;
+            textCanvas.height = 128;
+            const textCtx = textCanvas.getContext('2d');
+
+            // 涂鸦风格字体
+            textCtx.font = 'bold italic 48px "Comic Sans MS", cursive';
+            textCtx.fillStyle = '#333333';
+            textCtx.textAlign = 'center';
+            textCtx.textBaseline = 'middle';
+
+            // 添加一些手绘感觉的抖动
+            textCtx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            textCtx.shadowBlur = 2;
+            textCtx.fillText('close enough?', 256, 64);
+
+            const textTexture = new THREE.CanvasTexture(textCanvas);
+            const textMaterial = new THREE.MeshBasicMaterial({
+                map: textTexture,
+                transparent: true,
+                side: THREE.DoubleSide
+            });
+            const textMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.4), textMaterial);
+            textMesh.position.set(0, -1.5, 0.27);
+            whiteDoor.add(textMesh);
+
             // 放置在房子上空
             whiteDoor.position.set(0, 8, -10); // 在房子正上方
             whiteDoor.rotation.x = Math.PI / 6; // 稍微向下倾斜
@@ -576,6 +603,36 @@
             doorFrame.castShadow = true;
             textureDoor1.add(doorFrame);
 
+            // 添加涂鸦文字 "close enough?"
+            const textCanvas = document.createElement('canvas');
+            textCanvas.width = 512;
+            textCanvas.height = 128;
+            const textCtx = textCanvas.getContext('2d');
+
+            // 涂鸦风格字体
+            textCtx.font = 'bold italic 48px "Comic Sans MS", cursive';
+            textCtx.fillStyle = '#ffffff';
+            textCtx.textAlign = 'center';
+            textCtx.textBaseline = 'middle';
+
+            // 添加一些手绘感觉的描边
+            textCtx.strokeStyle = '#000000';
+            textCtx.lineWidth = 2;
+            textCtx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            textCtx.shadowBlur = 3;
+            textCtx.strokeText('close enough?', 256, 64);
+            textCtx.fillText('close enough?', 256, 64);
+
+            const textTexture = new THREE.CanvasTexture(textCanvas);
+            const textMaterial = new THREE.MeshBasicMaterial({
+                map: textTexture,
+                transparent: true,
+                side: THREE.DoubleSide
+            });
+            const textMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.4), textMaterial);
+            textMesh.position.set(0, -1.5, 0.16);
+            textureDoor1.add(textMesh);
+
             // 放置在场景中（房子左侧）
             textureDoor1.position.set(-8, 2.5, -12);
             textureDoor1.visible = true;
@@ -601,6 +658,36 @@
             const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
             doorFrame.castShadow = true;
             textureDoor2.add(doorFrame);
+
+            // 添加涂鸦文字 "close enough?"
+            const textCanvas = document.createElement('canvas');
+            textCanvas.width = 512;
+            textCanvas.height = 128;
+            const textCtx = textCanvas.getContext('2d');
+
+            // 涂鸦风格字体
+            textCtx.font = 'bold italic 48px "Comic Sans MS", cursive';
+            textCtx.fillStyle = '#ffffff';
+            textCtx.textAlign = 'center';
+            textCtx.textBaseline = 'middle';
+
+            // 添加一些手绘感觉的描边
+            textCtx.strokeStyle = '#000000';
+            textCtx.lineWidth = 2;
+            textCtx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            textCtx.shadowBlur = 3;
+            textCtx.strokeText('close enough?', 256, 64);
+            textCtx.fillText('close enough?', 256, 64);
+
+            const textTexture = new THREE.CanvasTexture(textCanvas);
+            const textMaterial = new THREE.MeshBasicMaterial({
+                map: textTexture,
+                transparent: true,
+                side: THREE.DoubleSide
+            });
+            const textMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.4), textMaterial);
+            textMesh.position.set(0, -1.5, 0.16);
+            textureDoor2.add(textMesh);
 
             // 放置在场景中（房子右侧）
             textureDoor2.position.set(8, 2.5, -12);
