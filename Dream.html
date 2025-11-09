@@ -611,16 +611,13 @@
 
             // 涂鸦风格字体
             textCtx.font = 'bold italic 48px "Comic Sans MS", cursive';
-            textCtx.fillStyle = '#ffffff';
+            textCtx.fillStyle = '#333333';
             textCtx.textAlign = 'center';
             textCtx.textBaseline = 'middle';
 
-            // 添加一些手绘感觉的描边
-            textCtx.strokeStyle = '#000000';
-            textCtx.lineWidth = 2;
-            textCtx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            textCtx.shadowBlur = 3;
-            textCtx.strokeText('close enough?', 256, 64);
+            // 添加一些手绘感觉的阴影
+            textCtx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            textCtx.shadowBlur = 2;
             textCtx.fillText('close enough?', 256, 64);
 
             const textTexture = new THREE.CanvasTexture(textCanvas);
@@ -667,16 +664,13 @@
 
             // 涂鸦风格字体
             textCtx.font = 'bold italic 48px "Comic Sans MS", cursive';
-            textCtx.fillStyle = '#ffffff';
+            textCtx.fillStyle = '#333333';
             textCtx.textAlign = 'center';
             textCtx.textBaseline = 'middle';
 
-            // 添加一些手绘感觉的描边
-            textCtx.strokeStyle = '#000000';
-            textCtx.lineWidth = 2;
-            textCtx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            textCtx.shadowBlur = 3;
-            textCtx.strokeText('close enough?', 256, 64);
+            // 添加一些手绘感觉的阴影
+            textCtx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            textCtx.shadowBlur = 2;
             textCtx.fillText('close enough?', 256, 64);
 
             const textTexture = new THREE.CanvasTexture(textCanvas);
