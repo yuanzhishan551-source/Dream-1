@@ -591,7 +591,7 @@
                 roughness: 0.4,
                 metalness: 0.3,
                 emissive: 0xffffff,
-                emissiveIntensity: 0.25
+                emissiveIntensity: 0.35
             });
             const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
             doorFrame.castShadow = true;
@@ -617,7 +617,7 @@
                 roughness: 0.4,
                 metalness: 0.3,
                 emissive: 0xffffff,
-                emissiveIntensity: 0.25
+                emissiveIntensity: 0.35
             });
             const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
             doorFrame.castShadow = true;
@@ -640,7 +640,7 @@
 
                 // 使用圆形分布，让门环绕在四周
                 const angle = (i / 15) * Math.PI * 2 + (Math.random() - 0.5) * 0.5; // 均匀分布在360度
-                const distance = 15 + Math.random() * 25; // 距离中心15-40
+                const distance = 15 + Math.random() * 60; // 距离中心15-75，增加远近变化
 
                 const x = Math.sin(angle) * distance;
                 const z = Math.cos(angle) * distance;
