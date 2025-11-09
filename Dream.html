@@ -838,6 +838,30 @@
 
             // 获取门的边界框
             const box = new THREE.Box3().setFromObject(door);
+
+            // 计算门的中心点
+            const center = new THREE.Vector3();
+            box.getCenter(center);
+
+            // 将中心点投影到屏幕空间
+            const projectedCenter = center.clone().project(camera);
+            const centerScreenX = (projectedCenter.x + 1) * window.innerWidth / 2;
+            const centerScreenY = (-projectedCenter.y + 1) * window.innerHeight / 2;
+
+            // 计算中心点到屏幕中心的距离
+            const screenCenterX = window.innerWidth / 2;
+            const screenCenterY = window.innerHeight / 2;
+            const distanceToCenter = Math.sqrt(
+                Math.pow(centerScreenX - screenCenterX, 2) +
+                Math.pow(centerScreenY - screenCenterY, 2)
+            );
+
+            // 如果门的中心离屏幕中心太远（超过屏幕宽度的25%），返回0
+            const maxCenterDistance = window.innerWidth * 0.25;
+            if (distanceToCenter > maxCenterDistance) {
+                return 0;
+            }
+
             const corners = [
                 new THREE.Vector3(box.min.x, box.min.y, box.min.z),
                 new THREE.Vector3(box.max.x, box.min.y, box.min.z),
