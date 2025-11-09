@@ -722,9 +722,9 @@
                 };
             });
 
-            // 检查是否所有角点都在相机前方
-            const allInFront = screenCorners.every(corner => corner.z > -1 && corner.z < 1);
-            if (!allInFront) {
+            // 检查是否大部分角点在相机前方（放宽条件）
+            const inFrontCount = screenCorners.filter(corner => corner.z < 1).length;
+            if (inFrontCount < 4) {
                 return 0;
             }
 
@@ -1129,15 +1129,16 @@
                 });
             }
 
-            // 检测所有门是否占据80%视野（在3D模式下）
+            // 检测所有门是否占据70%视野（在3D模式下）
             if (zoomLevel >= 0.7) {
+                const whiteDoorRatio = checkDoorInView(whiteDoor);
                 const door1Ratio = checkDoorInView(textureDoor1);
                 const door2Ratio = checkDoorInView(textureDoor2);
 
-                // 如果任何一个门占据80%视野，自动触发画廊模式
-                if (door1Ratio >= 0.8 || door2Ratio >= 0.8) {
-                    // 平滑过渡到画廊模式
-                    targetZoom -= 0.02;
+                // 如果任何一个门占据70%视野，自动触发画廊模式
+                if (whiteDoorRatio >= 0.7 || door1Ratio >= 0.7 || door2Ratio >= 0.7) {
+                    // 快速过渡到画廊模式
+                    targetZoom -= 0.08;
                     if (targetZoom < 0.5) {
                         targetZoom = 0.5;
                     }
