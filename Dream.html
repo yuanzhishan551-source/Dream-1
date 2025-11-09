@@ -296,10 +296,10 @@
 
         function createWhiteDoor() {
             whiteDoor = new THREE.Group();
-            
-            // 白色门框 - 放大到两倍
-            const doorFrameGeometry = new THREE.BoxGeometry(3, 4.5, 0.2);
-            const doorFrameMaterial = new THREE.MeshStandardMaterial({ 
+
+            // 白色门框 - 增加厚度
+            const doorFrameGeometry = new THREE.BoxGeometry(3, 4.5, 0.5);
+            const doorFrameMaterial = new THREE.MeshStandardMaterial({
                 color: 0xffffff,
                 roughness: 0.3,
                 metalness: 0.2,
@@ -310,45 +310,21 @@
             doorFrame.position.set(0, 0, 0);
             doorFrame.castShadow = true;
             whiteDoor.add(doorFrame);
-            
+
             // 门内部 - 更亮的白色
             const doorInsideGeometry = new THREE.PlaneGeometry(2.5, 4);
-            const doorInsideMaterial = new THREE.MeshBasicMaterial({ 
+            const doorInsideMaterial = new THREE.MeshBasicMaterial({
                 color: 0xffffff,
                 side: THREE.DoubleSide
             });
             const doorInside = new THREE.Mesh(doorInsideGeometry, doorInsideMaterial);
-            doorInside.position.set(0, 0, 0.1);
+            doorInside.position.set(0, 0, 0.26);
             whiteDoor.add(doorInside);
-            
-            // 添加白色光晕 - 梦核风格
-            const glowGeometry = new THREE.PlaneGeometry(3.5, 5);
-            const glowMaterial = new THREE.MeshBasicMaterial({ 
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.4,
-                side: THREE.DoubleSide
-            });
-            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-            glow.position.set(0, 0, -0.2);
-            whiteDoor.add(glow);
-            
-            // 添加第二层更大的白色光晕
-            const glow2Geometry = new THREE.PlaneGeometry(4.5, 6);
-            const glow2Material = new THREE.MeshBasicMaterial({ 
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.2,
-                side: THREE.DoubleSide
-            });
-            const glow2 = new THREE.Mesh(glow2Geometry, glow2Material);
-            glow2.position.set(0, 0, -0.4);
-            whiteDoor.add(glow2);
-            
+
             // 添加一些梦核风格的黑色小球体装饰（与白门对比）
             for (let i = 0; i < 2; i++) {
                 const sphereGeometry = new THREE.SphereGeometry(0.08, 8, 8);
-                const sphereMaterial = new THREE.MeshStandardMaterial({ 
+                const sphereMaterial = new THREE.MeshStandardMaterial({
                     color: 0x000000,
                     emissive: 0x000000,
                     emissiveIntensity: 0.5,
@@ -359,13 +335,13 @@
                 sphere.position.set(
                     (Math.random() - 0.5) * 2,
                     (Math.random() - 0.5) * 3.5,
-                    0.24 + Math.random() * 0.24
+                    0.3 + Math.random() * 0.24
                 );
                 sphere.userData.floatSpeed = Math.random() * 0.02 + 0.01;
                 sphere.userData.floatOffset = Math.random() * Math.PI * 2;
                 whiteDoor.add(sphere);
             }
-            
+
             // 放置在房子上空
             whiteDoor.position.set(0, 8, -10); // 在房子正上方
             whiteDoor.rotation.x = Math.PI / 6; // 稍微向下倾斜
@@ -613,7 +589,7 @@
                 roughness: 0.4,
                 metalness: 0.3,
                 emissive: 0xffffff,
-                emissiveIntensity: 0.5
+                emissiveIntensity: 0.25
             });
             const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
             doorFrame.castShadow = true;
@@ -639,7 +615,7 @@
                 roughness: 0.4,
                 metalness: 0.3,
                 emissive: 0xffffff,
-                emissiveIntensity: 0.5
+                emissiveIntensity: 0.25
             });
             const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
             doorFrame.castShadow = true;
