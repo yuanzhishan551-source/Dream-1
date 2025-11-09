@@ -52,6 +52,12 @@
         let targetPlaneFOV = 60;
         let wasInPlaneMode = false;
         let whiteDoor;
+        let textureDoor1, textureDoor2; // 两个新的纹理门
+        let door1AnimationProgress = 0; // 门1动画进度
+        let door2AnimationProgress = 0; // 门2动画进度
+        let currentWorld = 0; // 当前世界：0=初始, 1=世界1, 2=世界2
+        let weirdObjects1 = []; // 世界1的古怪物体
+        let weirdObjects2 = []; // 世界2的古怪物体
 
         function init() {
             scene = new THREE.Scene();
@@ -79,6 +85,10 @@
             createWorldPlane();
             createGalleryRoom();
             createDreamcoreDoor();
+            createTextureDoor1();
+            createTextureDoor2();
+            createWeirdWorld1();
+            createWeirdWorld2();
 
             document.addEventListener('mousedown', onMouseDown);
             document.addEventListener('mouseup', onMouseUp);
@@ -573,6 +583,247 @@
             scene.add(dreamcoreDoor);
         }
 
+        function createTextureDoor1() {
+            textureDoor1 = new THREE.Group();
+
+            // 加载纹理
+            const textureLoader = new THREE.TextureLoader();
+            const doorTexture = textureLoader.load('https://m.media-amazon.com/images/I/612SFrHTMNL._AC_SL1500_.jpg');
+
+            // 门框 - 使用纹理
+            const doorFrameGeometry = new THREE.BoxGeometry(3, 4.5, 0.3);
+            const doorFrameMaterial = new THREE.MeshStandardMaterial({
+                map: doorTexture,
+                roughness: 0.4,
+                metalness: 0.3,
+                emissive: 0xffffff,
+                emissiveIntensity: 0.3
+            });
+            const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
+            doorFrame.castShadow = true;
+            textureDoor1.add(doorFrame);
+
+            // 发光效果
+            const glowGeometry = new THREE.PlaneGeometry(4, 5.5);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: 0xffd700,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            });
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            glow.position.set(0, 0, -0.2);
+            textureDoor1.add(glow);
+
+            // 梦核风格的漂浮球体
+            for (let i = 0; i < 3; i++) {
+                const sphereGeometry = new THREE.SphereGeometry(0.15, 8, 8);
+                const sphereMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xff69b4,
+                    emissive: 0xff69b4,
+                    emissiveIntensity: 0.5,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                sphere.position.set(
+                    (Math.random() - 0.5) * 2.5,
+                    (Math.random() - 0.5) * 4,
+                    0.3 + Math.random() * 0.2
+                );
+                sphere.userData.floatSpeed = Math.random() * 0.02 + 0.01;
+                sphere.userData.floatOffset = Math.random() * Math.PI * 2;
+                textureDoor1.add(sphere);
+            }
+
+            // 放置在场景中（房子左侧）
+            textureDoor1.position.set(-8, 2.5, -12);
+            textureDoor1.visible = true;
+            scene.add(textureDoor1);
+        }
+
+        function createTextureDoor2() {
+            textureDoor2 = new THREE.Group();
+
+            // 加载纹理
+            const textureLoader = new THREE.TextureLoader();
+            const doorTexture = textureLoader.load('https://m.media-amazon.com/images/I/615KKqEE5dL._AC_SL1500_.jpg');
+
+            // 门框 - 使用纹理
+            const doorFrameGeometry = new THREE.BoxGeometry(3, 4.5, 0.3);
+            const doorFrameMaterial = new THREE.MeshStandardMaterial({
+                map: doorTexture,
+                roughness: 0.4,
+                metalness: 0.3,
+                emissive: 0xffffff,
+                emissiveIntensity: 0.3
+            });
+            const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
+            doorFrame.castShadow = true;
+            textureDoor2.add(doorFrame);
+
+            // 发光效果
+            const glowGeometry = new THREE.PlaneGeometry(4, 5.5);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00ffff,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            });
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            glow.position.set(0, 0, -0.2);
+            textureDoor2.add(glow);
+
+            // 梦核风格的漂浮球体
+            for (let i = 0; i < 3; i++) {
+                const sphereGeometry = new THREE.SphereGeometry(0.15, 8, 8);
+                const sphereMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x00ff00,
+                    emissive: 0x00ff00,
+                    emissiveIntensity: 0.5,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                sphere.position.set(
+                    (Math.random() - 0.5) * 2.5,
+                    (Math.random() - 0.5) * 4,
+                    0.3 + Math.random() * 0.2
+                );
+                sphere.userData.floatSpeed = Math.random() * 0.02 + 0.01;
+                sphere.userData.floatOffset = Math.random() * Math.PI * 2;
+                textureDoor2.add(sphere);
+            }
+
+            // 放置在场景中（房子右侧）
+            textureDoor2.position.set(8, 2.5, -12);
+            textureDoor2.visible = true;
+            scene.add(textureDoor2);
+        }
+
+        function createWeirdWorld1() {
+            // 创建古怪世界1的物体（粉色主题）
+            for (let i = 0; i < 10; i++) {
+                const geometry = new THREE.DodecahedronGeometry(Math.random() * 2 + 0.5);
+                const material = new THREE.MeshStandardMaterial({
+                    color: Math.random() > 0.5 ? 0xff69b4 : 0xffd700,
+                    emissive: 0xff1493,
+                    emissiveIntensity: 0.3,
+                    roughness: 0.3,
+                    metalness: 0.7
+                });
+                const obj = new THREE.Mesh(geometry, material);
+
+                const angle = (i / 10) * Math.PI * 2;
+                const distance = 15 + Math.random() * 15;
+                obj.position.set(
+                    Math.sin(angle) * distance,
+                    Math.random() * 8 + 1,
+                    Math.cos(angle) * distance
+                );
+
+                obj.userData.rotationSpeed = (Math.random() - 0.5) * 0.02;
+                obj.userData.floatSpeed = Math.random() * 0.01 + 0.005;
+                obj.userData.floatOffset = Math.random() * Math.PI * 2;
+                obj.castShadow = true;
+                obj.visible = false;
+
+                weirdObjects1.push(obj);
+                scene.add(obj);
+            }
+        }
+
+        function createWeirdWorld2() {
+            // 创建古怪世界2的物体（青色主题）
+            for (let i = 0; i < 10; i++) {
+                const geometry = new THREE.IcosahedronGeometry(Math.random() * 2 + 0.5);
+                const material = new THREE.MeshStandardMaterial({
+                    color: Math.random() > 0.5 ? 0x00ffff : 0x00ff00,
+                    emissive: 0x00ced1,
+                    emissiveIntensity: 0.3,
+                    roughness: 0.3,
+                    metalness: 0.7
+                });
+                const obj = new THREE.Mesh(geometry, material);
+
+                const angle = (i / 10) * Math.PI * 2;
+                const distance = 15 + Math.random() * 15;
+                obj.position.set(
+                    Math.sin(angle) * distance,
+                    Math.random() * 8 + 1,
+                    Math.cos(angle) * distance
+                );
+
+                obj.userData.rotationSpeed = (Math.random() - 0.5) * 0.02;
+                obj.userData.floatSpeed = Math.random() * 0.01 + 0.005;
+                obj.userData.floatOffset = Math.random() * Math.PI * 2;
+                obj.castShadow = true;
+                obj.visible = false;
+
+                weirdObjects2.push(obj);
+                scene.add(obj);
+            }
+        }
+
+        function checkDoorInView(door) {
+            if (!door || !door.visible) {
+                return 0;
+            }
+
+            // 获取门的边界框
+            const box = new THREE.Box3().setFromObject(door);
+            const corners = [
+                new THREE.Vector3(box.min.x, box.min.y, box.min.z),
+                new THREE.Vector3(box.max.x, box.min.y, box.min.z),
+                new THREE.Vector3(box.max.x, box.max.y, box.min.z),
+                new THREE.Vector3(box.min.x, box.max.y, box.min.z),
+                new THREE.Vector3(box.min.x, box.min.y, box.max.z),
+                new THREE.Vector3(box.max.x, box.min.y, box.max.z),
+                new THREE.Vector3(box.max.x, box.max.y, box.max.z),
+                new THREE.Vector3(box.min.x, box.max.y, box.max.z)
+            ];
+
+            // 将角点投影到屏幕空间
+            const screenCorners = corners.map(corner => {
+                const projected = corner.clone().project(camera);
+                return {
+                    x: (projected.x + 1) * window.innerWidth / 2,
+                    y: (-projected.y + 1) * window.innerHeight / 2,
+                    z: projected.z
+                };
+            });
+
+            // 检查是否所有角点都在相机前方
+            const allInFront = screenCorners.every(corner => corner.z > -1 && corner.z < 1);
+            if (!allInFront) {
+                return 0;
+            }
+
+            // 计算门在屏幕上的边界框
+            let minX = Infinity, maxX = -Infinity;
+            let minY = Infinity, maxY = -Infinity;
+
+            screenCorners.forEach(corner => {
+                minX = Math.min(minX, corner.x);
+                maxX = Math.max(maxX, corner.x);
+                minY = Math.min(minY, corner.y);
+                maxY = Math.max(maxY, corner.y);
+            });
+
+            // 限制在屏幕范围内
+            minX = Math.max(0, minX);
+            maxX = Math.min(window.innerWidth, maxX);
+            minY = Math.max(0, minY);
+            maxY = Math.min(window.innerHeight, maxY);
+
+            // 计算门占据的屏幕面积
+            const doorScreenArea = (maxX - minX) * (maxY - minY);
+            const totalScreenArea = window.innerWidth * window.innerHeight;
+            const ratio = doorScreenArea / totalScreenArea;
+
+            return ratio;
+        }
+
         function onMouseDown(e) {
             isMouseDown = true;
             lastMouseX = e.clientX;
@@ -925,6 +1176,75 @@
                         child.userData.floatOffset += child.userData.floatSpeed;
                         child.position.y += Math.sin(child.userData.floatOffset) * 0.15;
                     }
+                });
+            }
+
+            // 新门的浮动动画
+            if (textureDoor1 && textureDoor1.visible) {
+                textureDoor1.children.forEach(function(child) {
+                    if (child.userData && child.userData.floatSpeed !== undefined) {
+                        child.userData.floatOffset += child.userData.floatSpeed;
+                        child.position.y += Math.sin(child.userData.floatOffset) * 0.15;
+                    }
+                });
+            }
+
+            if (textureDoor2 && textureDoor2.visible) {
+                textureDoor2.children.forEach(function(child) {
+                    if (child.userData && child.userData.floatSpeed !== undefined) {
+                        child.userData.floatOffset += child.userData.floatSpeed;
+                        child.position.y += Math.sin(child.userData.floatOffset) * 0.15;
+                    }
+                });
+            }
+
+            // 检测门1是否占据80%视野
+            if (currentWorld === 0 && zoomLevel >= 0.7) {
+                const door1Ratio = checkDoorInView(textureDoor1);
+                if (door1Ratio >= 0.8 && door1AnimationProgress < 1) {
+                    door1AnimationProgress += 0.02;
+                    if (door1AnimationProgress >= 1) {
+                        door1AnimationProgress = 1;
+                        currentWorld = 1;
+                        // 进入世界1，显示粉色古怪物体
+                        weirdObjects1.forEach(obj => obj.visible = true);
+                        renderer.setClearColor(0xffb6c1, 1); // 浅粉色背景
+                        scene.fog.color.setHex(0xffb6c1);
+                    }
+                }
+
+                // 检测门2是否占据80%视野
+                const door2Ratio = checkDoorInView(textureDoor2);
+                if (door2Ratio >= 0.8 && door2AnimationProgress < 1) {
+                    door2AnimationProgress += 0.02;
+                    if (door2AnimationProgress >= 1) {
+                        door2AnimationProgress = 1;
+                        currentWorld = 2;
+                        // 进入世界2，显示青色古怪物体
+                        weirdObjects2.forEach(obj => obj.visible = true);
+                        renderer.setClearColor(0xe0ffff, 1); // 浅青色背景
+                        scene.fog.color.setHex(0xe0ffff);
+                    }
+                }
+            }
+
+            // 古怪物体的动画（世界1）
+            if (currentWorld === 1) {
+                weirdObjects1.forEach(function(obj) {
+                    obj.rotation.x += obj.userData.rotationSpeed;
+                    obj.rotation.y += obj.userData.rotationSpeed * 1.5;
+                    obj.userData.floatOffset += obj.userData.floatSpeed;
+                    obj.position.y += Math.sin(obj.userData.floatOffset) * 0.1;
+                });
+            }
+
+            // 古怪物体的动画（世界2）
+            if (currentWorld === 2) {
+                weirdObjects2.forEach(function(obj) {
+                    obj.rotation.x += obj.userData.rotationSpeed;
+                    obj.rotation.y += obj.userData.rotationSpeed * 1.5;
+                    obj.userData.floatOffset += obj.userData.floatSpeed;
+                    obj.position.y += Math.sin(obj.userData.floatOffset) * 0.1;
                 });
             }
 
