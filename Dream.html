@@ -611,46 +611,11 @@
             const doorFrameMaterial = new THREE.MeshStandardMaterial({
                 map: doorTexture,
                 roughness: 0.4,
-                metalness: 0.3,
-                emissive: 0xffffff,
-                emissiveIntensity: 0.3
+                metalness: 0.3
             });
             const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
             doorFrame.castShadow = true;
             textureDoor1.add(doorFrame);
-
-            // 发光效果
-            const glowGeometry = new THREE.PlaneGeometry(4, 5.5);
-            const glowMaterial = new THREE.MeshBasicMaterial({
-                color: 0xffd700,
-                transparent: true,
-                opacity: 0.3,
-                side: THREE.DoubleSide
-            });
-            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-            glow.position.set(0, 0, -0.2);
-            textureDoor1.add(glow);
-
-            // 梦核风格的漂浮球体
-            for (let i = 0; i < 3; i++) {
-                const sphereGeometry = new THREE.SphereGeometry(0.15, 8, 8);
-                const sphereMaterial = new THREE.MeshStandardMaterial({
-                    color: 0xff69b4,
-                    emissive: 0xff69b4,
-                    emissiveIntensity: 0.5,
-                    transparent: true,
-                    opacity: 0.7
-                });
-                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-                sphere.position.set(
-                    (Math.random() - 0.5) * 2.5,
-                    (Math.random() - 0.5) * 4,
-                    0.3 + Math.random() * 0.2
-                );
-                sphere.userData.floatSpeed = Math.random() * 0.02 + 0.01;
-                sphere.userData.floatOffset = Math.random() * Math.PI * 2;
-                textureDoor1.add(sphere);
-            }
 
             // 放置在场景中（房子左侧）
             textureDoor1.position.set(-8, 2.5, -12);
@@ -670,46 +635,11 @@
             const doorFrameMaterial = new THREE.MeshStandardMaterial({
                 map: doorTexture,
                 roughness: 0.4,
-                metalness: 0.3,
-                emissive: 0xffffff,
-                emissiveIntensity: 0.3
+                metalness: 0.3
             });
             const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
             doorFrame.castShadow = true;
             textureDoor2.add(doorFrame);
-
-            // 发光效果
-            const glowGeometry = new THREE.PlaneGeometry(4, 5.5);
-            const glowMaterial = new THREE.MeshBasicMaterial({
-                color: 0x00ffff,
-                transparent: true,
-                opacity: 0.3,
-                side: THREE.DoubleSide
-            });
-            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-            glow.position.set(0, 0, -0.2);
-            textureDoor2.add(glow);
-
-            // 梦核风格的漂浮球体
-            for (let i = 0; i < 3; i++) {
-                const sphereGeometry = new THREE.SphereGeometry(0.15, 8, 8);
-                const sphereMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x00ff00,
-                    emissive: 0x00ff00,
-                    emissiveIntensity: 0.5,
-                    transparent: true,
-                    opacity: 0.7
-                });
-                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-                sphere.position.set(
-                    (Math.random() - 0.5) * 2.5,
-                    (Math.random() - 0.5) * 4,
-                    0.3 + Math.random() * 0.2
-                );
-                sphere.userData.floatSpeed = Math.random() * 0.02 + 0.01;
-                sphere.userData.floatOffset = Math.random() * Math.PI * 2;
-                textureDoor2.add(sphere);
-            }
 
             // 放置在场景中（房子右侧）
             textureDoor2.position.set(8, 2.5, -12);
@@ -1269,25 +1199,6 @@
             // 白门小球的浮动动画
             if (whiteDoor && whiteDoor.visible) {
                 whiteDoor.children.forEach(function(child) {
-                    if (child.userData && child.userData.floatSpeed !== undefined) {
-                        child.userData.floatOffset += child.userData.floatSpeed;
-                        child.position.y += Math.sin(child.userData.floatOffset) * 0.15;
-                    }
-                });
-            }
-
-            // 新门的浮动动画
-            if (textureDoor1 && textureDoor1.visible) {
-                textureDoor1.children.forEach(function(child) {
-                    if (child.userData && child.userData.floatSpeed !== undefined) {
-                        child.userData.floatOffset += child.userData.floatSpeed;
-                        child.position.y += Math.sin(child.userData.floatOffset) * 0.15;
-                    }
-                });
-            }
-
-            if (textureDoor2 && textureDoor2.visible) {
-                textureDoor2.children.forEach(function(child) {
                     if (child.userData && child.userData.floatSpeed !== undefined) {
                         child.userData.floatOffset += child.userData.floatSpeed;
                         child.position.y += Math.sin(child.userData.floatOffset) * 0.15;
