@@ -323,7 +323,7 @@
             doorInside.position.set(0, 0, 0.26);
             whiteDoor.add(doorInside);
 
-            // 添加涂鸦文字 "close enough?"
+            // 添加涂鸦文字 "close enough?" - 随机位置和角度
             const textCanvas = document.createElement('canvas');
             textCanvas.width = 512;
             textCanvas.height = 128;
@@ -346,8 +346,22 @@
                 transparent: true,
                 side: THREE.DoubleSide
             });
-            const textMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.4), textMaterial);
-            textMesh.position.set(0, -1.5, 0.27);
+
+            // 随机大小（0.5到1.5倍，1.5x0.4为最大）
+            const textScale = 0.5 + Math.random() * 1.0;
+            const textMesh = new THREE.Mesh(
+                new THREE.PlaneGeometry(1.5 * textScale, 0.4 * textScale),
+                textMaterial
+            );
+
+            // 随机位置（门的不同位置）
+            const randomX = (Math.random() - 0.5) * 2; // -1 到 1
+            const randomY = (Math.random() - 0.5) * 3; // -1.5 到 1.5
+            textMesh.position.set(randomX, randomY, 0.27);
+
+            // 随机旋转（歪斜效果）
+            textMesh.rotation.z = (Math.random() - 0.5) * Math.PI / 6; // -30度到30度
+
             whiteDoor.add(textMesh);
 
             // 放置在房子上空
@@ -603,7 +617,7 @@
             doorFrame.castShadow = true;
             textureDoor1.add(doorFrame);
 
-            // 添加涂鸦文字 "close enough?"
+            // 添加涂鸦文字 "close enough?" - 随机位置和角度
             const textCanvas = document.createElement('canvas');
             textCanvas.width = 512;
             textCanvas.height = 128;
@@ -626,8 +640,22 @@
                 transparent: true,
                 side: THREE.DoubleSide
             });
-            const textMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.4), textMaterial);
-            textMesh.position.set(0, -1.5, 0.16);
+
+            // 随机大小（0.5到1.5倍，1.5x0.4为最大）
+            const textScale = 0.5 + Math.random() * 1.0;
+            const textMesh = new THREE.Mesh(
+                new THREE.PlaneGeometry(1.5 * textScale, 0.4 * textScale),
+                textMaterial
+            );
+
+            // 随机位置（门的不同位置）
+            const randomX = (Math.random() - 0.5) * 2; // -1 到 1
+            const randomY = (Math.random() - 0.5) * 3; // -1.5 到 1.5
+            textMesh.position.set(randomX, randomY, 0.16);
+
+            // 随机旋转（歪斜效果）
+            textMesh.rotation.z = (Math.random() - 0.5) * Math.PI / 6; // -30度到30度
+
             textureDoor1.add(textMesh);
 
             // 放置在场景中（房子左侧）
@@ -656,7 +684,7 @@
             doorFrame.castShadow = true;
             textureDoor2.add(doorFrame);
 
-            // 添加涂鸦文字 "close enough?"
+            // 添加涂鸦文字 "close enough?" - 随机位置和角度
             const textCanvas = document.createElement('canvas');
             textCanvas.width = 512;
             textCanvas.height = 128;
@@ -679,8 +707,22 @@
                 transparent: true,
                 side: THREE.DoubleSide
             });
-            const textMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.4), textMaterial);
-            textMesh.position.set(0, -1.5, 0.16);
+
+            // 随机大小（0.5到1.5倍，1.5x0.4为最大）
+            const textScale = 0.5 + Math.random() * 1.0;
+            const textMesh = new THREE.Mesh(
+                new THREE.PlaneGeometry(1.5 * textScale, 0.4 * textScale),
+                textMaterial
+            );
+
+            // 随机位置（门的不同位置）
+            const randomX = (Math.random() - 0.5) * 2; // -1 到 1
+            const randomY = (Math.random() - 0.5) * 3; // -1.5 到 1.5
+            textMesh.position.set(randomX, randomY, 0.16);
+
+            // 随机旋转（歪斜效果）
+            textMesh.rotation.z = (Math.random() - 0.5) * Math.PI / 6; // -30度到30度
+
             textureDoor2.add(textMesh);
 
             // 放置在场景中（房子右侧）
