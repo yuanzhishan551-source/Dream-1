@@ -996,9 +996,13 @@
                 if (galleryLight) galleryLight.visible = false;
                 if (dreamcoreDoor) dreamcoreDoor.visible = false;
                 
-                // 确保白门在渲染到纹理时可见
-                if (whiteDoor) whiteDoor.visible = true;
-                
+                // 确保门在渲染到纹理时可见（如果在初始世界）
+                if (currentWorld === 0) {
+                    if (whiteDoor) whiteDoor.visible = true;
+                    if (textureDoor1) textureDoor1.visible = true;
+                    if (textureDoor2) textureDoor2.visible = true;
+                }
+
                 // 隐藏阴影平面和画廊环境光
                 scene.children.forEach(function(child) {
                     if (child.name === 'shadowPlane' || child.name === 'galleryAmbient') {
@@ -1045,11 +1049,13 @@
                 worldPlane.visible = true;
                 galleryLight.visible = true;
                 dreamcoreDoor.visible = true;
-                
+
                 house.visible = false;
                 ground.visible = false;
                 sky.visible = false;
                 if (whiteDoor) whiteDoor.visible = false;
+                if (textureDoor1) textureDoor1.visible = false;
+                if (textureDoor2) textureDoor2.visible = false;
                 
                 // 显示阴影平面和画廊环境光
                 scene.children.forEach(function(child) {
@@ -1097,26 +1103,61 @@
             } else {
                 // 退出平面模式
                 wasInPlaneMode = false;
-                
+
                 // 显示3D世界
                 worldPlane.visible = false;
                 galleryLight.visible = false;
                 dreamcoreDoor.visible = false;
-                
-                house.visible = true;
-                ground.visible = true;
-                sky.visible = true;
-                if (whiteDoor) whiteDoor.visible = true;
-                
+
+                // 根据当前世界决定显示什么
+                if (currentWorld === 0) {
+                    // 初始世界 - 显示正常场景
+                    house.visible = true;
+                    ground.visible = true;
+                    sky.visible = true;
+                    if (whiteDoor) whiteDoor.visible = true;
+                    if (textureDoor1) textureDoor1.visible = true;
+                    if (textureDoor2) textureDoor2.visible = true;
+
+                    // 隐藏古怪物体
+                    weirdObjects1.forEach(obj => obj.visible = false);
+                    weirdObjects2.forEach(obj => obj.visible = false);
+
+                    renderer.setClearColor(0x87ceeb, 1);
+                    scene.fog.color.setHex(0x87ceeb);
+                } else if (currentWorld === 1) {
+                    // 世界1 - 粉色古怪世界
+                    house.visible = false;
+                    ground.visible = false;
+                    sky.visible = false;
+                    if (whiteDoor) whiteDoor.visible = false;
+                    if (textureDoor1) textureDoor1.visible = false;
+                    if (textureDoor2) textureDoor2.visible = false;
+
+                    weirdObjects1.forEach(obj => obj.visible = true);
+                    weirdObjects2.forEach(obj => obj.visible = false);
+
+                    renderer.setClearColor(0xffb6c1, 1);
+                    scene.fog.color.setHex(0xffb6c1);
+                } else if (currentWorld === 2) {
+                    // 世界2 - 青色古怪世界
+                    house.visible = false;
+                    ground.visible = false;
+                    sky.visible = false;
+                    if (whiteDoor) whiteDoor.visible = false;
+                    if (textureDoor1) textureDoor1.visible = false;
+                    if (textureDoor2) textureDoor2.visible = false;
+
+                    weirdObjects1.forEach(obj => obj.visible = false);
+                    weirdObjects2.forEach(obj => obj.visible = true);
+
+                    renderer.setClearColor(0xe0ffff, 1);
+                    scene.fog.color.setHex(0xe0ffff);
+                }
+
                 scene.children.forEach(function(child) {
                     if (child.name === 'shadowPlane' || child.name === 'galleryAmbient') {
                         child.visible = false;
-                    }
-                    if (child !== worldPlane && child !== dreamcoreDoor && child.type === 'Group') {
-                        child.visible = true;
-                    }
-                    if (child.type === 'Mesh' && child !== worldPlane && child.name !== 'shadowPlane') {
-                        child.visible = true;
                     }
                     if (child.type === 'DirectionalLight' && child !== galleryLight) {
                         child.visible = true;
@@ -1125,10 +1166,8 @@
                         child.visible = true;
                     }
                 });
-                
-                // 蓝色背景
-                renderer.setClearColor(0x87ceeb, 1);
-                scene.fog.color.setHex(0x87ceeb);
+
+                // 雾的设置
                 scene.fog.near = 40;
                 scene.fog.far = 120;
                 
@@ -1206,10 +1245,6 @@
                     if (door1AnimationProgress >= 1) {
                         door1AnimationProgress = 1;
                         currentWorld = 1;
-                        // 进入世界1，显示粉色古怪物体
-                        weirdObjects1.forEach(obj => obj.visible = true);
-                        renderer.setClearColor(0xffb6c1, 1); // 浅粉色背景
-                        scene.fog.color.setHex(0xffb6c1);
                     }
                 }
 
@@ -1220,10 +1255,6 @@
                     if (door2AnimationProgress >= 1) {
                         door2AnimationProgress = 1;
                         currentWorld = 2;
-                        // 进入世界2，显示青色古怪物体
-                        weirdObjects2.forEach(obj => obj.visible = true);
-                        renderer.setClearColor(0xe0ffff, 1); // 浅青色背景
-                        scene.fog.color.setHex(0xe0ffff);
                     }
                 }
             }
