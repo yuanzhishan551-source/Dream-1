@@ -54,6 +54,9 @@
         let whiteDoor;
         let textureDoor1; // 第一个纹理门
         let textureDoor2; // 第二个纹理门
+        let doorTransitionProgress = 0; // 门过渡动画进度
+        let targetDoor = null; // 当前目标门
+        let isTransitioning = false; // 是否正在过渡
 
         function init() {
             scene = new THREE.Scene();
@@ -808,6 +811,73 @@
             return;
         }
 
+        function checkDoorInView(door) {
+            if (!door || !door.visible) {
+                return 0;
+            }
+
+            // 获取门的边界框
+            const doorWidth = 3;
+            const doorHeight = 4.5;
+            const corners = [
+                new THREE.Vector3(-doorWidth/2, -doorHeight/2, 0),
+                new THREE.Vector3(doorWidth/2, -doorHeight/2, 0),
+                new THREE.Vector3(doorWidth/2, doorHeight/2, 0),
+                new THREE.Vector3(-doorWidth/2, doorHeight/2, 0)
+            ];
+
+            // 将角点转换到世界坐标系
+            corners.forEach(corner => {
+                corner.applyMatrix4(door.matrixWorld);
+            });
+
+            // 将角点投影到屏幕空间
+            const screenCorners = corners.map(corner => {
+                const projected = corner.clone().project(camera);
+                return {
+                    x: (projected.x + 1) * window.innerWidth / 2,
+                    y: (-projected.y + 1) * window.innerHeight / 2,
+                    z: projected.z
+                };
+            });
+
+            // 检查是否所有角点都在相机前方
+            const allInFront = screenCorners.every(corner => corner.z > -1 && corner.z < 1);
+            if (!allInFront) {
+                return 0;
+            }
+
+            // 计算门在屏幕上的边界框
+            let minX = Infinity, maxX = -Infinity;
+            let minY = Infinity, maxY = -Infinity;
+
+            screenCorners.forEach(corner => {
+                minX = Math.min(minX, corner.x);
+                maxX = Math.max(maxX, corner.x);
+                minY = Math.min(minY, corner.y);
+                maxY = Math.max(maxY, corner.y);
+            });
+
+            // 限制在屏幕范围内
+            minX = Math.max(0, minX);
+            maxX = Math.min(window.innerWidth, maxX);
+            minY = Math.max(0, minY);
+            maxY = Math.min(window.innerHeight, maxY);
+
+            // 计算门占据的屏幕面积
+            const doorScreenArea = (maxX - minX) * (maxY - minY);
+            const totalScreenArea = window.innerWidth * window.innerHeight;
+            const ratio = doorScreenArea / totalScreenArea;
+
+            return ratio;
+        }
+
+        function triggerDoorTransition(door) {
+            targetDoor = door;
+            doorTransitionProgress = 0;
+            isTransitioning = true;
+        }
+
         function animate() {
             requestAnimationFrame(animate);
 
@@ -1006,6 +1076,66 @@
                         child.position.y += Math.sin(child.userData.floatOffset) * 0.15;
                     }
                 });
+            }
+
+            // 只在3D模式下检测门（不在平面模式且不在过渡中）
+            if (zoomLevel >= 0.7 && !isTransitioning) {
+                // 检测门1是否占据80%视野
+                if (textureDoor1 && textureDoor1.visible) {
+                    const door1Ratio = checkDoorInView(textureDoor1);
+                    if (door1Ratio >= 0.8) {
+                        triggerDoorTransition(textureDoor1);
+                    }
+                }
+
+                // 检测门2是否占据80%视野
+                if (textureDoor2 && textureDoor2.visible) {
+                    const door2Ratio = checkDoorInView(textureDoor2);
+                    if (door2Ratio >= 0.8) {
+                        triggerDoorTransition(textureDoor2);
+                    }
+                }
+            }
+
+            // 门过渡动画
+            if (isTransitioning && targetDoor) {
+                doorTransitionProgress += 0.015; // 稍慢的过渡速度
+
+                // 门逐渐放大
+                const scale = 1 + doorTransitionProgress * 1.5;
+                targetDoor.scale.set(scale, scale, scale);
+
+                // 增强光晕效果
+                targetDoor.children.forEach(function(child) {
+                    if (child.material && child.material.transparent) {
+                        const originalOpacity = 0.2;
+                        child.material.opacity = Math.min(1, originalOpacity + doorTransitionProgress * 0.8);
+                    }
+                });
+
+                // 屏幕逐渐变白
+                const brightness = 1 + doorTransitionProgress * 3;
+                renderer.toneMappingExposure = brightness;
+
+                // 动画完成后进入平面模式
+                if (doorTransitionProgress >= 1) {
+                    // 重置门的缩放和光晕
+                    targetDoor.scale.set(1, 1, 1);
+                    targetDoor.children.forEach(function(child) {
+                        if (child.material && child.material.transparent) {
+                            child.material.opacity = 0.2;
+                        }
+                    });
+
+                    // 进入平面模式（触发缩小）
+                    targetZoom = 0.5;
+
+                    // 重置状态
+                    targetDoor = null;
+                    isTransitioning = false;
+                    doorTransitionProgress = 0;
+                    renderer.toneMappingExposure = 1;
+                }
             }
 
             renderer.render(scene, camera);
