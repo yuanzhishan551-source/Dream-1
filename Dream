@@ -52,6 +52,12 @@
         let targetPlaneFOV = 60;
         let wasInPlaneMode = false;
         let whiteDoor;
+        let textureDoor1; // 第一个纹理门
+        let textureDoor2; // 第二个纹理门
+        let isInDoor1World = false; // 是否在门1的世界
+        let isInDoor2World = false; // 是否在门2的世界
+        let doorTransitionProgress = 0; // 门过渡动画进度
+        let targetDoor = null; // 当前目标门
 
         function init() {
             scene = new THREE.Scene();
@@ -72,6 +78,8 @@
             createGround();
             createHouse();
             createWhiteDoor();
+            createTextureDoor1();
+            createTextureDoor2();
             createDreamcoreObjects();
             createClouds();
             addLights();
@@ -344,6 +352,156 @@
             whiteDoor.position.set(0, 8, -10); // 在房子正上方
             whiteDoor.rotation.x = Math.PI / 6; // 稍微向下倾斜
             scene.add(whiteDoor);
+        }
+
+        function createTextureDoor1() {
+            textureDoor1 = new THREE.Group();
+
+            // 使用TextureLoader加载图片
+            const textureLoader = new THREE.TextureLoader();
+            const doorTexture = textureLoader.load('https://m.media-amazon.com/images/I/612SFrHTMNL._AC_SL1500_.jpg');
+
+            // 门框 - 带纹理
+            const doorFrameGeometry = new THREE.BoxGeometry(3, 4.5, 0.3);
+            const doorFrameMaterial = new THREE.MeshStandardMaterial({
+                map: doorTexture,
+                roughness: 0.4,
+                metalness: 0.3,
+                emissive: 0xff6b9d, // 粉色发光
+                emissiveIntensity: 0.5
+            });
+            const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
+            doorFrame.castShadow = true;
+            textureDoor1.add(doorFrame);
+
+            // 添加彩色光晕 - 梦幻粉紫色
+            const glowGeometry = new THREE.PlaneGeometry(4, 5.5);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: 0xff6b9d,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            });
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            glow.position.set(0, 0, -0.2);
+            textureDoor1.add(glow);
+
+            // 第二层光晕 - 紫色
+            const glow2Geometry = new THREE.PlaneGeometry(5, 6.5);
+            const glow2Material = new THREE.MeshBasicMaterial({
+                color: 0xda70d6,
+                transparent: true,
+                opacity: 0.15,
+                side: THREE.DoubleSide
+            });
+            const glow2 = new THREE.Mesh(glow2Geometry, glow2Material);
+            glow2.position.set(0, 0, -0.4);
+            textureDoor1.add(glow2);
+
+            // 添加浮动的彩色粒子
+            for (let i = 0; i < 5; i++) {
+                const sphereGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+                const colors = [0xff69b4, 0xda70d6, 0x87ceeb, 0xffd700];
+                const sphereMaterial = new THREE.MeshStandardMaterial({
+                    color: colors[i % colors.length],
+                    emissive: colors[i % colors.length],
+                    emissiveIntensity: 0.8,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                sphere.position.set(
+                    (Math.random() - 0.5) * 3,
+                    (Math.random() - 0.5) * 4,
+                    0.2 + Math.random() * 0.3
+                );
+                sphere.userData.floatSpeed = Math.random() * 0.03 + 0.02;
+                sphere.userData.floatOffset = Math.random() * Math.PI * 2;
+                sphere.userData.orbitRadius = Math.random() * 0.5 + 0.3;
+                sphere.userData.orbitSpeed = Math.random() * 0.02 + 0.01;
+                textureDoor1.add(sphere);
+            }
+
+            // 放置在房子左侧远处
+            textureDoor1.position.set(-20, 5, -15);
+            textureDoor1.rotation.y = Math.PI / 4; // 稍微旋转面向玩家
+            textureDoor1.userData.originalPosition = textureDoor1.position.clone();
+            scene.add(textureDoor1);
+        }
+
+        function createTextureDoor2() {
+            textureDoor2 = new THREE.Group();
+
+            // 使用TextureLoader加载图片
+            const textureLoader = new THREE.TextureLoader();
+            const doorTexture = textureLoader.load('https://m.media-amazon.com/images/I/615KKqEE5dL._AC_SL1500_.jpg');
+
+            // 门框 - 带纹理
+            const doorFrameGeometry = new THREE.BoxGeometry(3, 4.5, 0.3);
+            const doorFrameMaterial = new THREE.MeshStandardMaterial({
+                map: doorTexture,
+                roughness: 0.4,
+                metalness: 0.3,
+                emissive: 0x4169e1, // 蓝色发光
+                emissiveIntensity: 0.5
+            });
+            const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
+            doorFrame.castShadow = true;
+            textureDoor2.add(doorFrame);
+
+            // 添加彩色光晕 - 梦幻蓝青色
+            const glowGeometry = new THREE.PlaneGeometry(4, 5.5);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: 0x4169e1,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            });
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            glow.position.set(0, 0, -0.2);
+            textureDoor2.add(glow);
+
+            // 第二层光晕 - 青色
+            const glow2Geometry = new THREE.PlaneGeometry(5, 6.5);
+            const glow2Material = new THREE.MeshBasicMaterial({
+                color: 0x00ced1,
+                transparent: true,
+                opacity: 0.15,
+                side: THREE.DoubleSide
+            });
+            const glow2 = new THREE.Mesh(glow2Geometry, glow2Material);
+            glow2.position.set(0, 0, -0.4);
+            textureDoor2.add(glow2);
+
+            // 添加浮动的彩色粒子
+            for (let i = 0; i < 5; i++) {
+                const sphereGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+                const colors = [0x4169e1, 0x00ced1, 0x7fffd4, 0x00ff7f];
+                const sphereMaterial = new THREE.MeshStandardMaterial({
+                    color: colors[i % colors.length],
+                    emissive: colors[i % colors.length],
+                    emissiveIntensity: 0.8,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                sphere.position.set(
+                    (Math.random() - 0.5) * 3,
+                    (Math.random() - 0.5) * 4,
+                    0.2 + Math.random() * 0.3
+                );
+                sphere.userData.floatSpeed = Math.random() * 0.03 + 0.02;
+                sphere.userData.floatOffset = Math.random() * Math.PI * 2;
+                sphere.userData.orbitRadius = Math.random() * 0.5 + 0.3;
+                sphere.userData.orbitSpeed = Math.random() * 0.02 + 0.01;
+                textureDoor2.add(sphere);
+            }
+
+            // 放置在房子右侧远处
+            textureDoor2.position.set(20, 5, -15);
+            textureDoor2.rotation.y = -Math.PI / 4; // 稍微旋转面向玩家
+            textureDoor2.userData.originalPosition = textureDoor2.position.clone();
+            scene.add(textureDoor2);
         }
 
         function createDreamcoreObjects() {
@@ -728,6 +886,241 @@
             return;
         }
 
+        function checkDoorInView(door) {
+            if (!door || !door.visible) {
+                return 0;
+            }
+
+            // 获取门的边界框
+            const doorWidth = 3;
+            const doorHeight = 4.5;
+            const corners = [
+                new THREE.Vector3(-doorWidth/2, -doorHeight/2, 0),
+                new THREE.Vector3(doorWidth/2, -doorHeight/2, 0),
+                new THREE.Vector3(doorWidth/2, doorHeight/2, 0),
+                new THREE.Vector3(-doorWidth/2, doorHeight/2, 0)
+            ];
+
+            // 将角点转换到世界坐标系
+            corners.forEach(corner => {
+                corner.applyMatrix4(door.matrixWorld);
+            });
+
+            // 将角点投影到屏幕空间
+            const screenCorners = corners.map(corner => {
+                const projected = corner.clone().project(camera);
+                return {
+                    x: (projected.x + 1) * window.innerWidth / 2,
+                    y: (-projected.y + 1) * window.innerHeight / 2,
+                    z: projected.z
+                };
+            });
+
+            // 检查是否所有角点都在相机前方
+            const allInFront = screenCorners.every(corner => corner.z > -1 && corner.z < 1);
+            if (!allInFront) {
+                return 0;
+            }
+
+            // 计算门在屏幕上的边界框
+            let minX = Infinity, maxX = -Infinity;
+            let minY = Infinity, maxY = -Infinity;
+
+            screenCorners.forEach(corner => {
+                minX = Math.min(minX, corner.x);
+                maxX = Math.max(maxX, corner.x);
+                minY = Math.min(minY, corner.y);
+                maxY = Math.max(maxY, corner.y);
+            });
+
+            // 限制在屏幕范围内
+            minX = Math.max(0, minX);
+            maxX = Math.min(window.innerWidth, maxX);
+            minY = Math.max(0, minY);
+            maxY = Math.min(window.innerHeight, maxY);
+
+            // 计算门占据的屏幕面积
+            const doorScreenArea = (maxX - minX) * (maxY - minY);
+            const totalScreenArea = window.innerWidth * window.innerHeight;
+            const ratio = doorScreenArea / totalScreenArea;
+
+            return ratio;
+        }
+
+        function triggerDoorTransition(door) {
+            targetDoor = door;
+            doorTransitionProgress = 0;
+        }
+
+        function enterDoorWorld(door) {
+            // 重置相机位置
+            camera.position.set(0, 1.6, 0);
+            renderer.toneMappingExposure = 1;
+
+            if (door === textureDoor1) {
+                isInDoor1World = true;
+                isInDoor2World = false;
+            } else if (door === textureDoor2) {
+                isInDoor2World = true;
+                isInDoor1World = false;
+            }
+
+            // 隐藏所有原有物体
+            house.visible = false;
+            ground.visible = false;
+            sky.visible = false;
+            whiteDoor.visible = false;
+            textureDoor1.visible = false;
+            textureDoor2.visible = false;
+            scene.children.forEach(function(child) {
+                if (child.type === 'Group' || child.type === 'Mesh') {
+                    child.visible = false;
+                }
+            });
+
+            targetDoor = null;
+        }
+
+        function renderDoor1World() {
+            // 门1的奇幻世界：粉紫色梦幻空间
+            renderer.setClearColor(0xff69b4, 1);
+            scene.fog.color.setHex(0xda70d6);
+            scene.fog.near = 20;
+            scene.fog.far = 80;
+
+            // 创建漂浮的几何体
+            if (!scene.userData.door1Objects) {
+                scene.userData.door1Objects = [];
+
+                // 创建多个漂浮的立方体和球体
+                for (let i = 0; i < 20; i++) {
+                    const geometry = Math.random() > 0.5 ?
+                        new THREE.BoxGeometry(2, 2, 2) :
+                        new THREE.SphereGeometry(1, 8, 8);
+
+                    const colors = [0xff69b4, 0xda70d6, 0xffd700, 0x87ceeb];
+                    const material = new THREE.MeshStandardMaterial({
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        emissive: colors[Math.floor(Math.random() * colors.length)],
+                        emissiveIntensity: 0.5,
+                        transparent: true,
+                        opacity: 0.8
+                    });
+
+                    const mesh = new THREE.Mesh(geometry, material);
+                    const angle = (i / 20) * Math.PI * 2;
+                    const distance = 10 + Math.random() * 20;
+                    mesh.position.set(
+                        Math.sin(angle) * distance,
+                        Math.random() * 10 - 5,
+                        Math.cos(angle) * distance
+                    );
+                    mesh.rotation.set(
+                        Math.random() * Math.PI,
+                        Math.random() * Math.PI,
+                        Math.random() * Math.PI
+                    );
+                    mesh.userData.rotationSpeed = {
+                        x: (Math.random() - 0.5) * 0.02,
+                        y: (Math.random() - 0.5) * 0.02,
+                        z: (Math.random() - 0.5) * 0.02
+                    };
+                    mesh.userData.floatSpeed = Math.random() * 0.02 + 0.01;
+                    mesh.userData.floatOffset = Math.random() * Math.PI * 2;
+                    mesh.visible = true;
+                    scene.add(mesh);
+                    scene.userData.door1Objects.push(mesh);
+                }
+            }
+
+            // 更新漂浮物体的动画
+            scene.userData.door1Objects.forEach(function(obj) {
+                obj.visible = true;
+                obj.rotation.x += obj.userData.rotationSpeed.x;
+                obj.rotation.y += obj.userData.rotationSpeed.y;
+                obj.rotation.z += obj.userData.rotationSpeed.z;
+                obj.userData.floatOffset += obj.userData.floatSpeed;
+                obj.position.y += Math.sin(obj.userData.floatOffset) * 0.05;
+            });
+
+            // 隐藏门2的物体
+            if (scene.userData.door2Objects) {
+                scene.userData.door2Objects.forEach(function(obj) {
+                    obj.visible = false;
+                });
+            }
+        }
+
+        function renderDoor2World() {
+            // 门2的奇幻世界：蓝青色神秘空间
+            renderer.setClearColor(0x4169e1, 1);
+            scene.fog.color.setHex(0x00ced1);
+            scene.fog.near = 20;
+            scene.fog.far = 80;
+
+            // 创建扭曲的几何结构
+            if (!scene.userData.door2Objects) {
+                scene.userData.door2Objects = [];
+
+                // 创建环形阵列
+                for (let i = 0; i < 15; i++) {
+                    const geometry = new THREE.TorusGeometry(2, 0.5, 8, 16);
+                    const colors = [0x4169e1, 0x00ced1, 0x7fffd4, 0x00ff7f];
+                    const material = new THREE.MeshStandardMaterial({
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        emissive: colors[Math.floor(Math.random() * colors.length)],
+                        emissiveIntensity: 0.6,
+                        transparent: true,
+                        opacity: 0.7,
+                        wireframe: Math.random() > 0.5
+                    });
+
+                    const mesh = new THREE.Mesh(geometry, material);
+                    const angle = (i / 15) * Math.PI * 2;
+                    const distance = 8 + Math.random() * 15;
+                    mesh.position.set(
+                        Math.sin(angle) * distance,
+                        Math.random() * 12 - 6,
+                        Math.cos(angle) * distance
+                    );
+                    mesh.rotation.set(
+                        Math.random() * Math.PI,
+                        Math.random() * Math.PI,
+                        Math.random() * Math.PI
+                    );
+                    mesh.userData.rotationSpeed = {
+                        x: (Math.random() - 0.5) * 0.03,
+                        y: (Math.random() - 0.5) * 0.03,
+                        z: (Math.random() - 0.5) * 0.03
+                    };
+                    mesh.userData.orbitSpeed = Math.random() * 0.01 + 0.005;
+                    mesh.userData.orbitAngle = angle;
+                    mesh.visible = true;
+                    scene.add(mesh);
+                    scene.userData.door2Objects.push(mesh);
+                }
+            }
+
+            // 更新物体的动画
+            scene.userData.door2Objects.forEach(function(obj) {
+                obj.visible = true;
+                obj.rotation.x += obj.userData.rotationSpeed.x;
+                obj.rotation.y += obj.userData.rotationSpeed.y;
+                obj.rotation.z += obj.userData.rotationSpeed.z;
+                obj.userData.orbitAngle += obj.userData.orbitSpeed;
+                const distance = Math.sqrt(obj.position.x * obj.position.x + obj.position.z * obj.position.z);
+                obj.position.x = Math.sin(obj.userData.orbitAngle) * distance;
+                obj.position.z = Math.cos(obj.userData.orbitAngle) * distance;
+            });
+
+            // 隐藏门1的物体
+            if (scene.userData.door1Objects) {
+                scene.userData.door1Objects.forEach(function(obj) {
+                    obj.visible = false;
+                });
+            }
+        }
+
         function animate() {
             requestAnimationFrame(animate);
 
@@ -926,6 +1319,83 @@
                         child.position.y += Math.sin(child.userData.floatOffset) * 0.15;
                     }
                 });
+            }
+
+            // 新纹理门的浮动动画和检测
+            if (textureDoor1 && textureDoor1.visible && !isInDoor1World && !isInDoor2World) {
+                textureDoor1.children.forEach(function(child) {
+                    if (child.userData && child.userData.floatSpeed !== undefined) {
+                        child.userData.floatOffset += child.userData.floatSpeed;
+                        const floatY = Math.sin(child.userData.floatOffset) * 0.2;
+                        const orbitX = Math.cos(child.userData.floatOffset * child.userData.orbitSpeed) * child.userData.orbitRadius;
+                        const orbitZ = Math.sin(child.userData.floatOffset * child.userData.orbitSpeed) * child.userData.orbitRadius;
+                        child.position.y += floatY;
+                        child.position.x += orbitX * 0.05;
+                        child.position.z += orbitZ * 0.05;
+                    }
+                });
+
+                // 检测门1是否占据80%视野
+                const door1Ratio = checkDoorInView(textureDoor1);
+                if (door1Ratio >= 0.8 && !targetDoor) {
+                    triggerDoorTransition(textureDoor1);
+                }
+            }
+
+            if (textureDoor2 && textureDoor2.visible && !isInDoor1World && !isInDoor2World) {
+                textureDoor2.children.forEach(function(child) {
+                    if (child.userData && child.userData.floatSpeed !== undefined) {
+                        child.userData.floatOffset += child.userData.floatSpeed;
+                        const floatY = Math.sin(child.userData.floatOffset) * 0.2;
+                        const orbitX = Math.cos(child.userData.floatOffset * child.userData.orbitSpeed) * child.userData.orbitRadius;
+                        const orbitZ = Math.sin(child.userData.floatOffset * child.userData.orbitSpeed) * child.userData.orbitRadius;
+                        child.position.y += floatY;
+                        child.position.x += orbitX * 0.05;
+                        child.position.z += orbitZ * 0.05;
+                    }
+                });
+
+                // 检测门2是否占据80%视野
+                const door2Ratio = checkDoorInView(textureDoor2);
+                if (door2Ratio >= 0.8 && !targetDoor) {
+                    triggerDoorTransition(textureDoor2);
+                }
+            }
+
+            // 门过渡动画
+            if (targetDoor && doorTransitionProgress < 1) {
+                doorTransitionProgress += 0.02;
+
+                // 相机向门移动
+                const doorPos = targetDoor.position.clone();
+                camera.position.lerp(doorPos, doorTransitionProgress * 0.1);
+
+                // 门逐渐放大并发光
+                const scale = 1 + doorTransitionProgress * 2;
+                targetDoor.scale.set(scale, scale, scale);
+
+                // 增强光晕效果
+                targetDoor.children.forEach(function(child) {
+                    if (child.material && child.material.transparent) {
+                        child.material.opacity = Math.min(1, child.material.opacity + 0.02);
+                    }
+                });
+
+                // 屏幕逐渐变亮
+                const brightness = 1 + doorTransitionProgress * 2;
+                renderer.toneMappingExposure = brightness;
+
+                // 动画完成后进入新世界
+                if (doorTransitionProgress >= 1) {
+                    enterDoorWorld(targetDoor);
+                }
+            }
+
+            // 在门的世界中
+            if (isInDoor1World) {
+                renderDoor1World();
+            } else if (isInDoor2World) {
+                renderDoor2World();
             }
 
             renderer.render(scene, camera);
