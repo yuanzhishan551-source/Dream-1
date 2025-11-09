@@ -53,11 +53,6 @@
         let wasInPlaneMode = false;
         let whiteDoor;
         let textureDoor1, textureDoor2; // 两个新的纹理门
-        let door1AnimationProgress = 0; // 门1动画进度
-        let door2AnimationProgress = 0; // 门2动画进度
-        let currentWorld = 0; // 当前世界：0=初始, 1=世界1, 2=世界2
-        let weirdObjects1 = []; // 世界1的古怪物体
-        let weirdObjects2 = []; // 世界2的古怪物体
 
         function init() {
             scene = new THREE.Scene();
@@ -87,8 +82,6 @@
             createDreamcoreDoor();
             createTextureDoor1();
             createTextureDoor2();
-            createWeirdWorld1();
-            createWeirdWorld2();
 
             document.addEventListener('mousedown', onMouseDown);
             document.addEventListener('mouseup', onMouseUp);
@@ -701,70 +694,6 @@
             scene.add(textureDoor2);
         }
 
-        function createWeirdWorld1() {
-            // 创建古怪世界1的物体（粉色主题）
-            for (let i = 0; i < 10; i++) {
-                const geometry = new THREE.DodecahedronGeometry(Math.random() * 2 + 0.5);
-                const material = new THREE.MeshStandardMaterial({
-                    color: Math.random() > 0.5 ? 0xff69b4 : 0xffd700,
-                    emissive: 0xff1493,
-                    emissiveIntensity: 0.3,
-                    roughness: 0.3,
-                    metalness: 0.7
-                });
-                const obj = new THREE.Mesh(geometry, material);
-
-                const angle = (i / 10) * Math.PI * 2;
-                const distance = 15 + Math.random() * 15;
-                obj.position.set(
-                    Math.sin(angle) * distance,
-                    Math.random() * 8 + 1,
-                    Math.cos(angle) * distance
-                );
-
-                obj.userData.rotationSpeed = (Math.random() - 0.5) * 0.02;
-                obj.userData.floatSpeed = Math.random() * 0.01 + 0.005;
-                obj.userData.floatOffset = Math.random() * Math.PI * 2;
-                obj.castShadow = true;
-                obj.visible = false;
-
-                weirdObjects1.push(obj);
-                scene.add(obj);
-            }
-        }
-
-        function createWeirdWorld2() {
-            // 创建古怪世界2的物体（青色主题）
-            for (let i = 0; i < 10; i++) {
-                const geometry = new THREE.IcosahedronGeometry(Math.random() * 2 + 0.5);
-                const material = new THREE.MeshStandardMaterial({
-                    color: Math.random() > 0.5 ? 0x00ffff : 0x00ff00,
-                    emissive: 0x00ced1,
-                    emissiveIntensity: 0.3,
-                    roughness: 0.3,
-                    metalness: 0.7
-                });
-                const obj = new THREE.Mesh(geometry, material);
-
-                const angle = (i / 10) * Math.PI * 2;
-                const distance = 15 + Math.random() * 15;
-                obj.position.set(
-                    Math.sin(angle) * distance,
-                    Math.random() * 8 + 1,
-                    Math.cos(angle) * distance
-                );
-
-                obj.userData.rotationSpeed = (Math.random() - 0.5) * 0.02;
-                obj.userData.floatSpeed = Math.random() * 0.01 + 0.005;
-                obj.userData.floatOffset = Math.random() * Math.PI * 2;
-                obj.castShadow = true;
-                obj.visible = false;
-
-                weirdObjects2.push(obj);
-                scene.add(obj);
-            }
-        }
-
         function checkDoorInView(door) {
             if (!door || !door.visible) {
                 return 0;
@@ -996,12 +925,10 @@
                 if (galleryLight) galleryLight.visible = false;
                 if (dreamcoreDoor) dreamcoreDoor.visible = false;
                 
-                // 确保门在渲染到纹理时可见（如果在初始世界）
-                if (currentWorld === 0) {
-                    if (whiteDoor) whiteDoor.visible = true;
-                    if (textureDoor1) textureDoor1.visible = true;
-                    if (textureDoor2) textureDoor2.visible = true;
-                }
+                // 确保门在渲染到纹理时可见
+                if (whiteDoor) whiteDoor.visible = true;
+                if (textureDoor1) textureDoor1.visible = true;
+                if (textureDoor2) textureDoor2.visible = true;
 
                 // 隐藏阴影平面和画廊环境光
                 scene.children.forEach(function(child) {
@@ -1109,51 +1036,16 @@
                 galleryLight.visible = false;
                 dreamcoreDoor.visible = false;
 
-                // 根据当前世界决定显示什么
-                if (currentWorld === 0) {
-                    // 初始世界 - 显示正常场景
-                    house.visible = true;
-                    ground.visible = true;
-                    sky.visible = true;
-                    if (whiteDoor) whiteDoor.visible = true;
-                    if (textureDoor1) textureDoor1.visible = true;
-                    if (textureDoor2) textureDoor2.visible = true;
+                // 显示正常场景
+                house.visible = true;
+                ground.visible = true;
+                sky.visible = true;
+                if (whiteDoor) whiteDoor.visible = true;
+                if (textureDoor1) textureDoor1.visible = true;
+                if (textureDoor2) textureDoor2.visible = true;
 
-                    // 隐藏古怪物体
-                    weirdObjects1.forEach(obj => obj.visible = false);
-                    weirdObjects2.forEach(obj => obj.visible = false);
-
-                    renderer.setClearColor(0x87ceeb, 1);
-                    scene.fog.color.setHex(0x87ceeb);
-                } else if (currentWorld === 1) {
-                    // 世界1 - 粉色古怪世界
-                    house.visible = false;
-                    ground.visible = false;
-                    sky.visible = false;
-                    if (whiteDoor) whiteDoor.visible = false;
-                    if (textureDoor1) textureDoor1.visible = false;
-                    if (textureDoor2) textureDoor2.visible = false;
-
-                    weirdObjects1.forEach(obj => obj.visible = true);
-                    weirdObjects2.forEach(obj => obj.visible = false);
-
-                    renderer.setClearColor(0xffb6c1, 1);
-                    scene.fog.color.setHex(0xffb6c1);
-                } else if (currentWorld === 2) {
-                    // 世界2 - 青色古怪世界
-                    house.visible = false;
-                    ground.visible = false;
-                    sky.visible = false;
-                    if (whiteDoor) whiteDoor.visible = false;
-                    if (textureDoor1) textureDoor1.visible = false;
-                    if (textureDoor2) textureDoor2.visible = false;
-
-                    weirdObjects1.forEach(obj => obj.visible = false);
-                    weirdObjects2.forEach(obj => obj.visible = true);
-
-                    renderer.setClearColor(0xe0ffff, 1);
-                    scene.fog.color.setHex(0xe0ffff);
-                }
+                renderer.setClearColor(0x87ceeb, 1);
+                scene.fog.color.setHex(0x87ceeb);
 
                 scene.children.forEach(function(child) {
                     if (child.name === 'shadowPlane' || child.name === 'galleryAmbient') {
@@ -1237,46 +1129,19 @@
                 });
             }
 
-            // 检测门1是否占据80%视野
-            if (currentWorld === 0 && zoomLevel >= 0.7) {
+            // 检测所有门是否占据80%视野（在3D模式下）
+            if (zoomLevel >= 0.7) {
                 const door1Ratio = checkDoorInView(textureDoor1);
-                if (door1Ratio >= 0.8 && door1AnimationProgress < 1) {
-                    door1AnimationProgress += 0.02;
-                    if (door1AnimationProgress >= 1) {
-                        door1AnimationProgress = 1;
-                        currentWorld = 1;
-                    }
-                }
-
-                // 检测门2是否占据80%视野
                 const door2Ratio = checkDoorInView(textureDoor2);
-                if (door2Ratio >= 0.8 && door2AnimationProgress < 1) {
-                    door2AnimationProgress += 0.02;
-                    if (door2AnimationProgress >= 1) {
-                        door2AnimationProgress = 1;
-                        currentWorld = 2;
+
+                // 如果任何一个门占据80%视野，自动触发画廊模式
+                if (door1Ratio >= 0.8 || door2Ratio >= 0.8) {
+                    // 平滑过渡到画廊模式
+                    targetZoom -= 0.02;
+                    if (targetZoom < 0.5) {
+                        targetZoom = 0.5;
                     }
                 }
-            }
-
-            // 古怪物体的动画（世界1）
-            if (currentWorld === 1) {
-                weirdObjects1.forEach(function(obj) {
-                    obj.rotation.x += obj.userData.rotationSpeed;
-                    obj.rotation.y += obj.userData.rotationSpeed * 1.5;
-                    obj.userData.floatOffset += obj.userData.floatSpeed;
-                    obj.position.y += Math.sin(obj.userData.floatOffset) * 0.1;
-                });
-            }
-
-            // 古怪物体的动画（世界2）
-            if (currentWorld === 2) {
-                weirdObjects2.forEach(function(obj) {
-                    obj.rotation.x += obj.userData.rotationSpeed;
-                    obj.rotation.y += obj.userData.rotationSpeed * 1.5;
-                    obj.userData.floatOffset += obj.userData.floatSpeed;
-                    obj.position.y += Math.sin(obj.userData.floatOffset) * 0.1;
-                });
             }
 
             renderer.render(scene, camera);
