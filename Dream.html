@@ -611,7 +611,9 @@
             const doorFrameMaterial = new THREE.MeshStandardMaterial({
                 map: doorTexture,
                 roughness: 0.4,
-                metalness: 0.3
+                metalness: 0.3,
+                emissive: 0xffffff,
+                emissiveIntensity: 0.5
             });
             const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
             doorFrame.castShadow = true;
@@ -635,7 +637,9 @@
             const doorFrameMaterial = new THREE.MeshStandardMaterial({
                 map: doorTexture,
                 roughness: 0.4,
-                metalness: 0.3
+                metalness: 0.3,
+                emissive: 0xffffff,
+                emissiveIntensity: 0.5
             });
             const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
             doorFrame.castShadow = true;
