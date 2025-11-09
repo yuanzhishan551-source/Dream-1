@@ -1322,11 +1322,11 @@
                     // 白门动画：门持续放大占满屏幕，然后白光闪现并消散
                     if (animationProgress < 0.8) {
                         // 第一阶段：门持续放大直到占满整个屏幕
-                        targetZoom -= 0.15;
+                        targetZoom += 0.15; // 增加zoom让FOV变小，门看起来更大
 
-                        // 确保门真正占满屏幕
-                        if (targetZoom < 0.05) {
-                            targetZoom = 0.05;
+                        // 确保门真正占满屏幕（zoom变得很大）
+                        if (targetZoom > 20.0) {
+                            targetZoom = 20.0;
                         }
                     } else if (animationProgress < 0.85) {
                         // 第二阶段：白光快速闪现
