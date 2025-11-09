@@ -323,27 +323,6 @@
             doorInside.position.set(0, 0, 0.26);
             whiteDoor.add(doorInside);
 
-            // 添加一些梦核风格的黑色小球体装饰（与白门对比）
-            for (let i = 0; i < 2; i++) {
-                const sphereGeometry = new THREE.SphereGeometry(0.08, 8, 8);
-                const sphereMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x000000,
-                    emissive: 0x000000,
-                    emissiveIntensity: 0.5,
-                    transparent: true,
-                    opacity: 0.6
-                });
-                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-                sphere.position.set(
-                    (Math.random() - 0.5) * 2,
-                    (Math.random() - 0.5) * 3.5,
-                    0.3 + Math.random() * 0.24
-                );
-                sphere.userData.floatSpeed = Math.random() * 0.02 + 0.01;
-                sphere.userData.floatOffset = Math.random() * Math.PI * 2;
-                whiteDoor.add(sphere);
-            }
-
             // 放置在房子上空
             whiteDoor.position.set(0, 8, -10); // 在房子正上方
             whiteDoor.rotation.x = Math.PI / 6; // 稍微向下倾斜
@@ -1225,16 +1204,6 @@
                     if (child.userData && child.userData.floatSpeed !== undefined) {
                         child.userData.floatOffset += child.userData.floatSpeed;
                         child.position.y += Math.sin(child.userData.floatOffset) * 0.2;
-                    }
-                });
-            }
-
-            // 白门小球的浮动动画
-            if (whiteDoor && whiteDoor.visible) {
-                whiteDoor.children.forEach(function(child) {
-                    if (child.userData && child.userData.floatSpeed !== undefined) {
-                        child.userData.floatOffset += child.userData.floatSpeed;
-                        child.position.y += Math.sin(child.userData.floatOffset) * 0.15;
                     }
                 });
             }
