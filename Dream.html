@@ -364,9 +364,9 @@
 
             whiteDoor.add(textMesh);
 
-            // 放置在房子上空
-            whiteDoor.position.set(0, 8, -10); // 在房子正上方
-            whiteDoor.rotation.x = Math.PI / 6; // 稍微向下倾斜
+            // 放置在地面上，靠近玩家
+            whiteDoor.position.set(0, 2.25, -5); // 在地面上，距离更近
+            whiteDoor.rotation.x = 0; // 垂直立在地上
             scene.add(whiteDoor);
         }
 
@@ -658,8 +658,8 @@
 
             textureDoor1.add(textMesh);
 
-            // 放置在场景中（房子左侧）
-            textureDoor1.position.set(-8, 2.5, -12);
+            // 放置在场景中（靠近玩家，左侧）
+            textureDoor1.position.set(-5, 2.25, -6);
             textureDoor1.visible = true;
             scene.add(textureDoor1);
         }
@@ -725,8 +725,8 @@
 
             textureDoor2.add(textMesh);
 
-            // 放置在场景中（房子右侧）
-            textureDoor2.position.set(8, 2.5, -12);
+            // 放置在场景中（靠近玩家，右侧）
+            textureDoor2.position.set(5, 2.25, -6);
             textureDoor2.visible = true;
             scene.add(textureDoor2);
         }
