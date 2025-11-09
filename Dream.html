@@ -1292,8 +1292,8 @@
                     const door1Ratio = checkDoorInView(textureDoor1);
                     const door2Ratio = checkDoorInView(textureDoor2);
 
-                    // 判断哪个门占据了70%以上的视野
-                    if (whiteDoorRatio >= 0.7 || door1Ratio >= 0.7 || door2Ratio >= 0.7) {
+                    // 判断哪个门占据了70%以上的视野，并且用户正在主动放大（zoomLevel > 1.5）
+                    if ((whiteDoorRatio >= 0.7 || door1Ratio >= 0.7 || door2Ratio >= 0.7) && zoomLevel > 1.5) {
                         // 触发白门动画
                         isAnimating = true;
                         animationType = 'white';
