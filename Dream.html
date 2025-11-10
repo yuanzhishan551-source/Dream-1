@@ -1046,12 +1046,13 @@
             }
 
             e.preventDefault();
-            const delta = e.deltaY * 0.002;
+            // 反转方向并增加灵敏度：向下滚=缩小，向上滚=放大
+            const delta = -e.deltaY * 0.005;
 
             // 在平面模式下
             if (zoomLevel < 0.7) {
-                // 总是可以调整视野FOV（反转方向，保持和3D一致）
-                const fovDelta = -delta * 30; // 负号反转方向：向下滚=FOV减小=放大
+                // 总是可以调整视野FOV
+                const fovDelta = delta * 30; // delta已经反转，向上滚=FOV减小=放大
                 targetPlaneFOV += fovDelta;
                 targetPlaneFOV = Math.max(0.1, Math.min(120, targetPlaneFOV)); // 最小0.1度，可以放得超级大
 
