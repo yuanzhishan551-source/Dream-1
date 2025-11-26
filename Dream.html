@@ -1043,9 +1043,9 @@
                 noiseSky.name = 'noiseSky';
                 scene.add(noiseSky);
 
-                // 3. 添加一个巨大的眼睛贴图在天空上（40倍大小）
+                // 3. 添加一个巨大的眼睛贴图在天空上（20倍大小）
                 const eyeTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/yuanzhishan551-source/Dream-1/main/Eye1.png');
-                const giantEyeGeometry = new THREE.PlaneGeometry(120, 120); // 原来3x3，现在120x120
+                const giantEyeGeometry = new THREE.PlaneGeometry(60, 60); // 原来3x3，现在60x60（20倍）
                 const giantEyeMaterial = new THREE.MeshBasicMaterial({
                     map: eyeTexture,
                     transparent: true,
@@ -1107,14 +1107,14 @@
                     sky.material.needsUpdate = true;
                 }
 
-                // 替换地面
+                // 替换地面 - 重新加载纹理以支持平铺
                 if (ground) {
-                    const eyeTextureTiled = eyeTexture.clone();
-                    eyeTextureTiled.wrapS = THREE.RepeatWrapping;
-                    eyeTextureTiled.wrapT = THREE.RepeatWrapping;
-                    eyeTextureTiled.repeat.set(10, 10);
+                    const eyeTextureGround = new THREE.TextureLoader().load('https://raw.githubusercontent.com/yuanzhishan551-source/Dream-1/main/Eye1.png');
+                    eyeTextureGround.wrapS = THREE.RepeatWrapping;
+                    eyeTextureGround.wrapT = THREE.RepeatWrapping;
+                    eyeTextureGround.repeat.set(10, 10);
                     ground.material = new THREE.MeshBasicMaterial({
-                        map: eyeTextureTiled,
+                        map: eyeTextureGround,
                         side: THREE.DoubleSide
                     });
                     ground.material.needsUpdate = true;
