@@ -1054,11 +1054,68 @@
                 });
                 const giantEye = new THREE.Mesh(giantEyeGeometry, giantEyeMaterial);
 
-                // 放在天空中，稍微远一点
-                giantEye.position.set(0, 50, -80);
+                // 放在天空中侧面，避免被门挡住
+                giantEye.position.set(50, 45, -60);
                 giantEye.lookAt(0, 0, 0); // 朝向相机原点
                 giantEye.name = 'giantEye';
                 scene.add(giantEye);
+
+                // 4. 在初始视角正后方添加另一个巨大眼睛
+                const giantEyeGeometry2 = new THREE.PlaneGeometry(60, 60);
+                const giantEyeMaterial2 = new THREE.MeshBasicMaterial({
+                    map: eyeTexture,
+                    transparent: true,
+                    side: THREE.DoubleSide,
+                    opacity: 0.8
+                });
+                const giantEye2 = new THREE.Mesh(giantEyeGeometry2, giantEyeMaterial2);
+                giantEye2.position.set(0, 30, 80); // 在相机正后方
+                giantEye2.lookAt(0, 0, 0);
+                giantEye2.name = 'giantEyeBack';
+                scene.add(giantEye2);
+
+                // 5. 在巨大眼睛后面添加一扇门
+                const backDoorGroup = new THREE.Group();
+
+                // 门框
+                const backDoorFrame = new THREE.Mesh(
+                    new THREE.BoxGeometry(4, 6, 0.3),
+                    new THREE.MeshStandardMaterial({
+                        color: 0x8B4513,
+                        roughness: 0.8,
+                        metalness: 0.2
+                    })
+                );
+                backDoorGroup.add(backDoorFrame);
+
+                // 门板
+                const backDoorPanel = new THREE.Mesh(
+                    new THREE.BoxGeometry(3.5, 5.5, 0.2),
+                    new THREE.MeshStandardMaterial({
+                        color: 0x654321,
+                        roughness: 0.6,
+                        metalness: 0.1
+                    })
+                );
+                backDoorPanel.position.z = 0.25;
+                backDoorGroup.add(backDoorPanel);
+
+                // 门把手
+                const backDoorKnob = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.15, 16, 16),
+                    new THREE.MeshStandardMaterial({
+                        color: 0xFFD700,
+                        roughness: 0.3,
+                        metalness: 0.8
+                    })
+                );
+                backDoorKnob.position.set(1.5, 0, 0.5);
+                backDoorGroup.add(backDoorKnob);
+
+                // 放在大眼睛后面
+                backDoorGroup.position.set(0, 0, 100);
+                backDoorGroup.name = 'backDoor';
+                scene.add(backDoorGroup);
 
                 // 4. 部分门的贴图变成雪花
                 const randomDoors = doorClones.slice(0, Math.floor(doorClones.length / 2));
