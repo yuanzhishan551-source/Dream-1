@@ -1043,7 +1043,24 @@
                 noiseSky.name = 'noiseSky';
                 scene.add(noiseSky);
 
-                // 3. 部分门的贴图变成雪花
+                // 3. 添加一个巨大的眼睛贴图在天空上（40倍大小）
+                const eyeTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/yuanzhishan551-source/Dream-1/main/Eye1.png');
+                const giantEyeGeometry = new THREE.PlaneGeometry(120, 120); // 原来3x3，现在120x120
+                const giantEyeMaterial = new THREE.MeshBasicMaterial({
+                    map: eyeTexture,
+                    transparent: true,
+                    side: THREE.DoubleSide,
+                    opacity: 0.8
+                });
+                const giantEye = new THREE.Mesh(giantEyeGeometry, giantEyeMaterial);
+
+                // 放在天空中，稍微远一点
+                giantEye.position.set(0, 50, -80);
+                giantEye.lookAt(0, 0, 0); // 朝向相机原点
+                giantEye.name = 'giantEye';
+                scene.add(giantEye);
+
+                // 4. 部分门的贴图变成雪花
                 const randomDoors = doorClones.slice(0, Math.floor(doorClones.length / 2));
                 randomDoors.forEach(door => {
                     door.children.forEach(child => {
@@ -1054,8 +1071,7 @@
                     });
                 });
 
-                // 4. 添加更多眼睛
-                const eyeTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/yuanzhishan551-source/Dream-1/main/Eye1.png');
+                // 5. 添加更多小眼睛
                 for (let i = 0; i < 5; i++) {
                     const eyeGeometry = new THREE.PlaneGeometry(3, 3);
                     const eyeMaterial = new THREE.MeshBasicMaterial({
