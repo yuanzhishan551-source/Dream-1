@@ -1151,9 +1151,9 @@
                 }
 
             } else if (whiteDoorEnterCount >= 3) {
-                // 第三阶段：梦境完全崩坏
+                // 第四阶段：梦境完全崩坏
                 // 1. 天空和地板全部换成眼睛贴图
-                const eyeTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/yuanzhishan551-source/Dream-1/main/Eye1.png');
+                const eyeTexture = new THREE.TextureLoader().load('https://i.pinimg.com/736x/c8/97/40/c89740ab8cf968d1596e7a9b996b6328.jpg');
 
                 // 替换天空
                 if (sky) {
@@ -1166,7 +1166,7 @@
 
                 // 替换地面 - 重新加载纹理以支持平铺
                 if (ground) {
-                    const eyeTextureGround = new THREE.TextureLoader().load('https://raw.githubusercontent.com/yuanzhishan551-source/Dream-1/main/Eye1.png');
+                    const eyeTextureGround = new THREE.TextureLoader().load('https://i.pinimg.com/736x/c8/97/40/c89740ab8cf968d1596e7a9b996b6328.jpg');
                     eyeTextureGround.wrapS = THREE.RepeatWrapping;
                     eyeTextureGround.wrapT = THREE.RepeatWrapping;
                     eyeTextureGround.repeat.set(10, 10);
